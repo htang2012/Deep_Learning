@@ -79,7 +79,7 @@ data = data.fillna(data.mean())
 
 
 #revisit distributions
-for i in data.columns:
+for i in data.columns[1:5] #again, limit this for sanity's sake. you get the picture after seeing a few. 
 	data[i].hist(bins=20)
 	plt.show()
 
@@ -88,7 +88,7 @@ data = pd.DataFrame(scale(data))
 print("shape: ")
 print(data.shape)
 
-data.select_dtypes(include=['object'])
+#data.select_dtypes(include=['object'])
 
 #data = pd.DataFrame(StandardScaler().fit_transform(data))
 
@@ -109,15 +109,13 @@ train_y.shape
 
 sgd = SGD(lr=learning_rate)
 model = Sequential()
-model.add(Dense(128, input_dim=train_x.shape[1], init='normal', activation='relu'))
-model.add(Dense(64, input_dim=128, init='normal', activation='relu'))
+model.add(Dense(64, input_dim=train_x.shape[1], init='normal', activation='relu'))
 model.add(Dense(32, input_dim=64, init='normal', activation='relu'))
-model.add(Dense(16, input_dim=32, init='normal', activation='relu'))
-model.add(Dense(1, input_dim=16, init='normal', activation='sigmoid'))
-model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy']) # Compile model
+model.add(Dense(1, input_dim=32, init='normal', activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # Compile model
 
 #callbacks_list = [EarlyStopping(monitor='binary_crossentropy', patience=5)]
-history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=2000, 
+history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=200, 
 	batch_size=64, verbose=2)#, callbacks=callbacks_list)
 
 preds = model.predict(test_x)
