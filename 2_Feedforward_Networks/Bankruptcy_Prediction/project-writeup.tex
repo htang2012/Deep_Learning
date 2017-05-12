@@ -1,0 +1,499 @@
+\documentclass[12pt]{article}  % This tells LaTex what sort of \usepackage{amssymb}  
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage{easybmat}
+\usepackage{listings}
+\usepackage{lipsum}
+\usepackage{dsfont}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{epstopdf}
+\usepackage{scalerel,stackengine}
+\usepackage{changepage}
+\usepackage{tikz}
+\usepackage{color}
+\usepackage{mathrsfs}
+\usepackage{centernot}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usetikzlibrary{fit,matrix}
+
+% \linespread{1.3}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  First we set the page layout.
+
+\usepackage[top= 1in, bottom= 1in,left=1.25in,right=1.25in]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  Begin user defined commands
+
+\newcommand{\map}[1]{\xrightarrow{#1}}
+\newcommand{\iso}{\cong}
+\newcommand{\define}{\stackrel{\mathrm{def}}{=}}
+
+%Special Sets
+\newcommand{\N}{\mathbb N} %Naturals
+\newcommand{\Z}{\mathbb Z} %Integers
+\newcommand{\Q}{\mathbb Q} %Rationals
+\newcommand{\R}{\mathbb R} %Reals
+\newcommand{\C}{\mathbb C} %Complex Field
+\newcommand{\U}{\mathcal{U}} %Open Set
+\newcommand{\B}{\mathcal{B}} % Borel sigma field
+\newcommand{\OpenSet}{\mathcal{O}} %Another open set
+
+%Operators
+\newcommand{\Exp}[1]{\mathbb{E}\left( {#1}\right)} %Expectation operator
+\newcommand{\Mexp}[2]{\mathbb{E}_{{#1}}\left({#2}\right)}
+\newcommand{\Prob}[1]{\mathbb P\left({#1}\right)} %Probability measure
+\newcommand{\Mprob}[2]{\mathbb{P}_{{#1}}\left({#2}\right)}
+\newcommand{\pder}[2]{\frac{\partial {#1}}{\partial {#2}}} %partial derivative
+\newcommand{\der}[2]{\frac{\mathrm{d} {#1}}{\mathrm{d} {#2}}} %derivative
+\newcommand{\dif}{\,\mathrm{d}} %differential
+\newcommand{\EL}{\mathcal{L}} %differential operator
+\newcommand{\ip}[2]{\left\langle{#1},{#2}\right\rangle}
+\newcommand{\norm}[1]{\left|\left|{#1}\right|\right|}
+\newcommand{\mat}[1]{\textbf{#1}}
+
+
+%Listing things...
+\newcommand{\xs}[1]{x_1,x_2,\dots,x_{#1}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\abs}[1]{\left|{#1}\right|}
+\newcommand{\parens}[1]{\left({#1}\right)}
+\newcommand{\cb}[1]{\left\{{#1}\right\}}
+\newcommand{\bracs}[1]{\left[{#1}\right]}
+\newcommand{\goodchi}{\protect\raisebox{2pt}{$\chi$}}
+
+\def\upint{\mathchoice%
+    {\mkern13mu\overline{\vphantom{\intop}\mkern7mu}\mkern-20mu}%
+    {\mkern7mu\overline{\vphantom{\intop}\mkern7mu}\mkern-14mu}%
+    {\mkern7mu\overline{\vphantom{\intop}\mkern7mu}\mkern-14mu}%
+    {\mkern7mu\overline{\vphantom{\intop}\mkern7mu}\mkern-14mu}%
+  \int}
+\def\lowint{\mkern3mu\underline{\vphantom{\intop}\mkern7mu}\mkern-10mu\int}
+\newcommand*{\lcdot}{\raisebox{-0.5ex}{\scalebox{2}{$\cdot$}}}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+		\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\stackMath
+\newcommand\reallywidehat[1]{%
+	\savestack{\tmpbox}{\stretchto{%
+			\scaleto{%
+				\scalerel*[\widthof{\ensuremath{#1}}]{\kern-.6pt\bigwedge\kern-.6pt}%
+				{\rule[-\textheight/2]{1ex}{\textheight}}%WIDTH-LIMITED BIG WEDGE
+			}{\textheight}% 
+		}{0.5ex}}%
+	\stackon[1pt]{#1}{\tmpbox}%
+}
+\parskip 1ex
+
+%  End user defined commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% These establish different environments for stating Theorems, Lemmas, Remarks, etc.
+
+\newtheorem{Thm}{Theorem}[section]
+\newtheorem{Prop}[Thm]{Proposition}
+\newtheorem{Lem}[Thm]{Lemma}
+\newtheorem{Cor}[Thm]{Corollary}
+\newtheorem{Axiom}[Thm]{Axiom}
+
+\theoremstyle{definition}
+\newtheorem{Def}[Thm]{Definition}
+\newtheorem{Ex}[Thm]{Example}
+\newtheorem{Exercise}[Thm]{Exercise}
+\newtheorem{Problem}[Thm]{Problem}
+
+\theoremstyle{remark}
+\newtheorem{Rem}[Thm]{Remark}
+
+\newenvironment{Proof}{\noindent\textbf{Proof.}}{\qed}
+
+
+\renewcommand{\labelenumi}{(\alph{enumi})}
+
+\renewcommand*\contentsname{Table of Contents}
+
+\pagestyle{fancy}
+
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}} % set the \leftmark
+
+\fancyhf{}
+\rhead{\S\thesection}
+\lhead{\thechapter}
+\cfoot{Page \thepage}
+\fancyhead[R]{\rightmark} % predefined ()
+\fancyhead[L]{\S \thesection: \leftmark} % 1. sectionname
+% \fancypagestyle{plain}{%
+%   \fancyhf{}%
+%   \renewcommand{\headrulewidth}{0pt}%
+% }
+
+
+\begin{document}
+	\begin{titlepage}
+		\centering
+		\includegraphics[width=0.25\textwidth]{BC_Seal.eps}\par\vspace{1cm}
+		{\scshape\huge Boston College \par}
+		\vspace{1cm}
+		{\scshape\Large Department of Economics\\
+		Independent Study in Neural Networks\par}
+		\vspace{1.5cm}
+		{\huge\bfseries Extreme Event Forecasting:\\ Using Artificial Neural Networks to Predict Bankruptcy in Poland\par}
+		\vspace{2cm}
+		{\Large\itshape
+		James LeDoux}
+		\vfill
+
+		% Bottom of the page
+		{\large Spring 2017\par}
+	\end{titlepage}
+
+\section{Introduction}
+primer on extreme events and why they're hard to predict. why neural networks might be up to the task. 
+
+\section{Data}
+polish bankruptcy data overview. variables / financial ratios. time lag. 
+- preprocessing steps. outlier fixing because of crazy distributions seen in distressed companies' financial indicators. scaling so no variable dominates the others. de-meaning, scaling to unit variance. 
+
+\section{Logistic Regression Benchmark}
+\subsection{Theoretical Underpinnings}
+We begin by defining the maximum likelihood estimator.  Let $(\Omega, \mathcal{A}, \mathbb{P})$ be a probability space, and define the random variable $Y:\Omega\to \R$ with probability density $f,$ which has a parameter $\theta$  Suppose we take a sample of size $n$ from the $Y$ distribution.  Then, we define the {\color{blue}likelihood function} as
+	\[Lik(\theta) = \prod_{i=1}^n f(Y_i),\]
+and the {\color{blue}log-likelihood function} as $\ell(\theta) = \log\prod_{i=1}^n f(Y_i)$.  Then, if we want to estimate the parameter $\theta,$ we need to find
+	\begin{equation}
+		\hat{\theta} = \arg\max_{t\in\Theta} \ell(t),
+	\end{equation}
+where $\Theta = \cb{t:t\text{ is a parameter for }Y}.$  This estimator $\hat{\theta}$ is called the {\color{blue}maximum likelihood estimator}. 
+\par We assume that $Y_i\sim\mathrm{Bernoulli}(p_i)$.  Then,
+	\[\Prob{Y_i = y} = p_i^y(1-p_i)^{1-y},\]
+for $y\in \cb{0,1}.$  Furthermore, suppose that $Y_i\perp Y_j$ for $i\neq j$.  Now, let $X:\Omega\to \R^{k}$ be a random vector on the same probability space, and suppose that we draw a sample of size $n$ from the $X$ distribution.  We want to estimate the parameter $\beta\in \R^{k+1}$ such that
+	\[\Prob{Y_i = 1| X_i} = \frac{1}{1+\exp\parens{-\ip{\beta}{X_i}}},\]
+where $\ip{\beta}{X_i} = \sum_{j=0}^{k}\beta_jx_{j,i},$ for $x_{0,i} = 1$ for all $i=1,2,\dots, n$.  We find the estimator $\hat{\beta}$ of $\beta$ by using ML estimation stated in (1).  For a regression of $Y$ onto $X$ for $X:\Omega\to \R$, we obtain a model that looks like the following graphic.
+
+%\begin{figure}
+	%[H]
+	%\centering
+	%\includegraphics[width = 0.8\textwidth]{logit_graphic.pdf}
+%\end{figure}
+
+\subsection{Results}
+- logit results
+
+\section{Neural Networks}
+\subsection{Theoretical Underpinnings}
+\par Deep feedforward networks, also called multilayer perceptrons (MLPs), were the first class of deep learning model developed in the 1970s.  The goal of a feedforward network is to approximate a function $f^{*},$ defining a mapping $y=f(x;\theta)$ that learns the best parameters $\theta$ for approximating $f^{*}$ (Goodfellow et al. 2016). 
+
+\par The "network" part of the name comes from the fact that a neural network is typically comprised of several stacked functions, commonly referred to as layers. Given functions $f^{1}, f^{2}, \text{ and } f^{3},$ for example, a feedforward network could be defined as $f^{3}(f^{2}(f^{1})),$ where the output of $f^{1}$ is fed into $f^{2},$ which is then fed into $f^{3},$ which in turn produces the network's output. The initial layer of this network, which receives the input data, is called the input layer. The final layer, producing the output, is referred to as the output layer. All layers in-between these two are referred to as hidden layers (Goodfellow et al. 2016). In the case of binary classification tasks such as that being attempted in this paper, the final layer will be a sigmoid function that takes the output of the model's penultimate layer and feed it through a function bounded between zero and one. 
+
+\par Similar to other machine-learned models, a feedforward network learns by gradient descent; that is, by iteratively updating its weights according to the gradient of a cost function that it attempts to optimize. The key difference between gradient descent in neural networks and in simpler algorithms is that the stacked nature of a neural network's layers and weights means that additional steps are required in order to compute these gradients. The learning procedure for a feedforward network, in brief, is: 
+
+% source: http://neuralnetworksanddeeplearning.com/chap2.html (remember to cite this book)
+% Nielsen (2017)
+\begin{enumerate}[{1}]
+   \item \textbf{Feed Forward:} propagate the model's input through the network by multiplying each layer's input by the layer's weight vector $w^l$ and passing this through an activation function $\sigma$, obtaining output $\hat{y}$
+  
+   \item \textbf{Calculate Cost Function:} given model output $\hat{y}$ and target value $y$, calculate the model's cost function $C(\hat{y}, y),$ where $C$ can be the mean squared error, accuracy, cross entropy, or any other cost function. 
+ 
+   \item \textbf{Backpropagate the Error:} for each layer $l=L-1, L-2, ..., 2$ compute the error $\delta^{l}=((w^{l+1})^T\delta^{l+1})\odot \sigma^{\prime}z^{l},$ where $\sigma$ is the activation function and $z^l$ is the weighted input to the neurons in layer $l$. Effectively, what this is doing is taking the known error at layer $l+1$ and propagating it backward through the weights and activation functions of the previous layers of the network. This allows us to calculate the gradient of the cost function $\frac{\partial{C}}{\partial{w^{l}_{jk}}}$ where $l$ represents a layer and $k$ represents an individual weight (Nielsen 2017). 
+    
+   \item \textbf{Update Weights:} with the gradient of the cost function now calculated with respect to each hidden unit, perform the standard gradient descent step of either adding or subtracting the product of the model's learning rate and weights to the pre-existing weights at each layer. Whether this is an addition or subtraction step depends on whether the cost function is being maximized or minimized. 
+\end{enumerate}
+
+\par For an in-depth discussion of the backpropagation algorithm, see Nielsen (2017). Many specifications of these models exist, which will be discussed in the following section. 
+
+\section{Hyperparameter Tuning and Model Architectures}
+\par In order to build a neural binary classification model of bankruptcies, I test a variety of different network architectures, tuning their respective hyperparameters in order to achieve optimal performance. In line with universal approximation theorem's claim that the size and quantity of layers affects model accuracy, I begin by testing model size and depth (Hornik et al. 1989), testing differing between-layer activation functions as well. In order to achieve better out-of-sample generalization, I test three different regularization strategies: Dropout, weight penalties, and batch normalization. Finally, in an attempt to achieve an efficient learning procedure, I also test various optimization procedures, including stochastic gradient descent and the adaptive learning rate algorithms ADAM and RMSprop. Gaining an idea of what might be successful from these tests, I run a final parameter search over the architectures and parameters that have shown promise in order to see which  combination of parameters and architecture is most successful. 
+
+\subsection{Layer Size}
+\par Universal approximation theorem shows that neural networks are universal function approximators. This means that, given a sufficient number of neurons, a neural network can achieve any desired level of accuracy on a dataset (Hornik et al. 1989). 
+
+\par Adding neurons to a neural network, however, is not a free lunch. First, while it is theoretically possible to approximate any function with this class of model, the number of neurons required to do so may be prohibitively large. Neural models become increasingly challenging and slow to train as weights are added, so this becomes problematic as the number of neurons per layer enters the thousands. 
+
+\par Second, universal approximation theorem only apply to in-sample accuracy. While a function can be approximated to an arbitrary degree of accuracy in sample, this does not guarantee strong out of sample performance. A perfectly fit model in-sample, after all, is often overfit. 
+
+\par For these reasons, it is important to test for the optimal number of neurons per layer when fitting a neural network. Here I test the out of sample accuracy and AUC score of a single-layer model with layer sizes ranging between 4 and 1024 weights. All models had only one hidden layer, and were trained using the Adam optimizer with ReLU activation functions and the binary cross-entropy loss function (Table 1). 
+
+\begin{table}[]
+\centering
+\caption{Relationship between Layer Size and Model Performance}
+\label{my-label}
+\begin{tabular}{lll}
+Number of Neurons & Accuracy (\%) & AUC  \\
+4                 & 97.12         & 0.68 \\
+8                 & 96.94         & 0.65 \\
+16                & 97.22         & 0.69 \\
+32                & 97.15         & 0.67 \\
+64                & 97.29         & 0.73 \\
+128               & 97.58         & 0.73 \\
+256               & 97.54         & 0.73 \\
+512               & 97.51         & 0.73 \\
+1024              & 97.58         & 0.72
+\end{tabular}
+\end{table}
+
+
+\par While the smaller layer sizes of 4 through 32 nodes per layer appear to be too little, showing sub-73\% AUC scores, all layer sizes above these values showed similar levels of success. Viewing the how the accuracy and loss scores changed during training, we can see that the model does not approach the ability to seriously overfit the data until it reaches 64 units per hidden layer (Figures 1 - 6). The ability to overfit is a desirable quality to have in a model, because this means that it is not missing out on accuracy due to under-fitting. Over-fitting in such models can be combatted by early stopping, regularization, or both. For this reason, a model should have at least 64 units per hidden layer when trained on this data set. Additionally, it is worth noting that adding nodes significantly increases training time.
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/neuron-16-acc.png}
+  \caption{Training and Test Accuracy with 16 Neurons}\label{small-neuron}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/neuron-32-acc.png}
+  \caption{Training and Test Accuracy with 32 Neurons}\label{med-neuron}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/neuron-64-acc.png}
+  \caption{Training and Test Accuracy with 64 Neurons}\label{large-neuron}
+\endminipage
+\end{figure}
+
+
+\par more text 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/neuron-16-loss.png}
+  \caption{Training and Test Loss with 16 Neurons}\label{small-neuron-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/neuron-32-loss.png}
+  \caption{Training and Test Loss with 32 Neurons}\label{med-neuron-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/neuron-64-loss.png}
+  \caption{Training and Test Loss with 64 Neurons}\label{large-neuron-loss}
+\endminipage
+\end{figure}
+
+\subsection{Number of Layers}
+
+\par Adding additional layers allows a model to learn more complex, nonlinear patterns in the data. A simple early example of this in the literature is the XOR problem. The "exclusive or", otherwise called XOR, is a binary classification problem where, given two values $x$ and $y$, a point is only classified as true when one, but not both values equal one. Minsky and Papert (1969) show that a single-layer neural network is incapable of solving this problem, as the classes are not linearly separable. Adding additional layers to such a model, however, introduces the nonlinearity required in order to solve such a problem. 
+\par While not all deep learning tasks are simple two-dimensional classification problems, the XOR example serves as a minimal example of how adding layers to a network may help. Adding layers to a network allows a model to learn more complex interactions between features, providing more of an opportunity for the model to learn the underlying structure of the training data. 
+\par For this reason, I test the impact of adding layers to a simple neural network. Using 64 units per layer, I test models with between one and eight hidden layers (Table 2). All models for this test use ReLU activation functions, the Adam optimizer, and binary cross entropy cost function. 
+
+%note: relu activations, adam optimizer, 64 units per layer 
+\begin{table}[]
+\centering
+\caption{Relationship between Number of Layers and Model Performance}
+\label{my-label}
+\begin{tabular}{lll}
+Number of Layers & Accuracy (\%) & AUC  \\
+1                & 96.94         & 0.63 \\
+2                & 97.12         & 0.65 \\
+3                & 96.94         & 0.67 \\
+4                & 96.91         & 0.62 \\
+5                & 96.94         & 0.69 \\
+6                & 96.87         & 0.62 \\
+7                & 96.79         & 0.64 \\
+8                & 96.86         & 0.62
+\end{tabular}
+\end{table}
+
+\par Table 2 shows that adding layers to this model improves its performance until a certain point, and then begins to make it less accurate out of sample. This indicates that the reduced bias of the model is improving its performance when adding a second and third layer, but after this point it begins to overfit. This is the exact pattern one would expect due to the bias-variance tradeoff, because each added layer both reduces bias and increases variance. For this reason, adding layers to a model is not a catch-all solution. Here it appears that somewhere between three and five layers is optimal. 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/depth-1-acc.png}
+  \caption{Training and Test Accuracy with 1 Layer}\label{1-layer}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/depth-2-acc.png}
+  \caption{Training and Test Accuracy with 2 Layers}\label{2-layers}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/depth-3-acc.png}
+  \caption{Training and Test Accuracy with 3 Layers}\label{3-layers}
+\endminipage
+\end{figure}
+
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/depth-1-loss.png}
+  \caption{Training and Test Loss with 1 Layer}\label{1-layers}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/depth-2-loss.png}
+  \caption{Training and Test Loss with 2 Layers}\label{2-layers}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/depth-3-loss.png}
+  \caption{Training and Test Loss with 3 Layers}\label{3-layers}
+\endminipage
+\end{figure}
+
+\par  Figures 7 - 12 show that adding layers makes a model prone to overfit earlier-on during training. The training procedure also becomes more complicated, as can be seen by the noisier patterns followed by the accuracy and loss lines of the networks with more than one hidden layer. Both of these problems can be partially remedied by regularization, which is tested in a different section of this paper. 
+
+\subsection{Activation Functions}
+% using a three layer network with 128 neurons/layer so the effects of the activations are more pronounced 
+% relu, sigmoid, tanh
+% tex each one of them. 
+
+\par An additional parameter important to a model's performance is its activation function. All weight-input products in a neural network are fed through a nonlinear activation function, as otherwise the network would produce a linear decision boundary (Raschka 2016). Different activation functions, however, exhibit different performance, with some being preferable to others. Here I test three different activations on this classification task.
+\par The first activation I test is the sigmoid function. The sigmoidal activation was the original deep learning activation function, being a nonlinear function that is already recognized by most, if not all, in the statistical learning field. The function is defined as:
+
+$$\sigma{(X)} = \frac{1}{1+\text{exp}(-X)}.$$
+
+\par While this activation was common in the early years of deep learning, it has recently fallen out of favor for computational reasons. Because the function smooths out at its tails, its derivative is close to zero for most of the function's domain. As a result of this, computers sometimes face problems of numerical overflow with this function, where the gradient is rounded to zero. This quality can harm model performance during training, as saturated gradients slow the learning process (Karpathy 2016). 
+\par The second activation I test is the hyperbolic tangent function (tanh). The tanh activation is defined as:
+
+$$\text{tanh}(X)=\frac{\text{exp}(X)-\text{exp}(-X)}{\text{exp}(X)+\text{exp}(-X)}, $$
+
+or alternatively:
+
+$$ 2\sigma{(X)} - 1. $$
+
+\par This function is typically preferred to the  logistic sigmoid for a variety of reasons. First, because it is bounded between -1 and 1,  it will commonly output values close to zero, whereas the logistic sigmoid will more commonly output values close to 0.5 (Lecun et al. 1998). This helps the network decide which features are most important. Second,  this function tends to have larger gradients, which aids the learning process. 
+\par The final activation function I test is quickly becoming one of the most commonly used: the Rectified Linear Unit (ReLU). This function computes:
+
+$$ \text{ReLU}(X) = \text{max}(0,X), $$
+
+making the function linear after $x=0,$ and equal to zero everywhere else. The main benefit of the ReLU is that it's quick to compute, speeding up stochastic gradient descent by up to a factor of six (Krizhevsky et al. 2012). The downside, however, is that this unit can be fragile, with the units often "dying" and becoming stuck being equal to zero during training (Karpathy 2016).
+
+\par The results of testing these three activation functions are shown in Table 3. 
+
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{lll}
+Activation Function & Accuracy (\%) & AUC  \\
+Tanh                & 97.54         & 0.74 \\
+ReLU                & 97.54         & 0.73 \\
+Sigmoid             & 97.43         & 0.70
+\end{tabular}
+\end{table}
+
+\par and even more filler text, wow 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/activation-tanh-acc.png}
+  \caption{Training and Test Accuracy with Tanh Activations}\label{tanh-acc}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/activation-acc-relu.png}
+  \caption{Training and Test Accuracy with ReLU Activations}\label{relu-acc}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/activation-sigmoid-acc.png}
+  \caption{Training and Test Accuracy with Sigmoid Activations}\label{sigmoid-acc}
+\endminipage
+\end{figure}
+
+
+\par and more yet 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/activation-tanh-loss.png}
+  \caption{Training and Test Loss with Tanh Activations}\label{tanh}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/activation-loss-relu.png}
+  \caption{Training and Test Loss with ReLU Activations}\label{relu}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/activation-sigmoid-loss.png}
+  \caption{Training and Test Loss with Sigmoid Activations}\label{sigmoid}
+\endminipage
+\end{figure}
+
+
+\subsection{Regularization: Dropout}
+\par My next consideration in model-building was regularization. Regularization works by trading increased bias for reduced variance, serving as a remedy to the overfitting problem. A tried and true strategy for building successful neural networks is to use large, appropriately regularized models (Goodfellow et al. 2016). 
+\par The first regularization strategy I test is Dropout. First introduced by Srivastava et al. (2014), Dropout provides a method for regularizing a broad family of models. This method works by "dropping out" a fixed percentage of nodes at random during each training iteration, forcing those weights to equal zero. The impact of dropping out nodes at random in this way is that it forces the network to learn representations of the data in its hidden layers that are robust to missing or modified information. If a network is being trained to recognize faces in images, for example, the network cannot learn to rely too heavily on an individual neuron that has learned to recognize individual features in the data such as noses or ears. If this individual neuron is required for the model's success and it is dropped out, after all, the model will have poor performance. As a result of this constraint, models trained using a dropout strategy must either learn more robust representations of features (i.e. have multiple nodes serve the purpose of recognizing a nose on a face, rather than just one), or learn more general representations of the data that still hold predictive accuracy on previously unseen data with potentially different properties (i.e. being able to recognize a face with no nose or ears).  
+
+\par If we consider each combination of non-dropped-out nodes to be a unique model, this regularization strategy can be viewed as a bagging method, where each iteration trains a unique model that shares parameters with every other model (Goodfellow et al. 2016). Each iteration, borrowing some weights from the previous model and given a fresh set of constraints via its new set of dropped-out nodes, is encouraged to learn something slightly different than the previous. The end result is often a model with superior generalization to unseen data. The bias is higher due to the constraints imposed by setting nodes equal to zero during training, but the variance is lower for this same reason. 
+
+\par Here I test models using between-layer dropout of between 0 and 50\% of nodes. All models consisted of three hidden layers, each with 1024 units (Table X). All models used the Adam optimizer with hyperbolic tangent activation functions and the binary cross entropy cost function.
+
+\begin{table}[]
+\centering
+\caption{Performance of Models using Dropout}
+\label{my-label}
+\begin{tabular}{lll}
+Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
+0                                   & 97.54         & 0.75 \\
+10                                  & 97.40         & 0.75 \\
+20                                  & 97.23         & 0.71 \\
+30                                  & 97.44         & 0.73 \\
+40                                  & 97.51         & 0.74 \\
+50                                  & 97.80         & 0.75
+\end{tabular}
+\end{table}
+
+
+\par The results of this testing shown in Table 4 demonstrate the value of regularizing a large model. Despite placing significant constraints on the model during training, the model with half of its units dropped out during each training iteration was able to match the performance of the model using no dropout at all. While the zero and ten percent dropout models' relative success makes this a somewhat complicated set of results to interpret, we can see from the improvements shown from moving from 20 to 30, 30 to 40, and then 40 to 50\% dropout that adding additional regularization strength can improve the performance of a large model. 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/30-dropout-acc.png}
+  \caption{Training and Test Accuracy with 30\% Dropout}\label{30-drop}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/40-dropout-acc.png}
+  \caption{Training and Test Accuracy with 40\% Dropout}\label{40-drop}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/50-dropout-acc.png}
+  \caption{Training and Test Accuracy with 50\% Dropout}\label{50-drop}
+\endminipage
+\end{figure}
+
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/30-dropout-loss.png}
+  \caption{Training and Test Loss with 30\% Dropout}\label{30-drop-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/40-dropout-loss.png}
+  \caption{Training and Test Loss with 40\% Dropouts}\label{40-drop-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}%
+  \includegraphics[width=\linewidth]{dl-paper/50-dropout-loss.png}
+  \caption{Training and Test Loss with 50\% Dropout}\label{50-drop-loss}
+\endminipage
+\end{figure}
+
+\par Figures 19 through 24 show qualitatively the benefit of regularizing a neural network. First, we see that as additional dropout is added, the training and test accuracy curves move closer together. Second, we see that increasing the regularization of these models noticeably smooths out the test-loss curve, allowing loss to improve for a larger number of training steps and reducing the rate at which overfitting occurs as training continues. These are desirable qualities, indicating that dropping out 40 or 50\% of weights during training is an effective strategy for this model. 
+
+\subsection{Regularization: Weight Penalties}
+\subsection{Regularization: Batch Normalization}
+\subsection{Optimization: Adaptive Learning Rates}
+\subsection{Optimization: Random Parameter search}
+- why it's better than grid search. free lunch!
+\subsection{Hardware}
+\par While not necessarily a model parameter, computer hardware is an important part of the training process. Because neural networks are slow to train compared to most other models, fitting large neural networks is often prohibitively slow on a personal computer. For this reason, I used the GPU-enabled devices in the Machine Learning Lab located in St. Mary's Hall. The NVIDIA Titan X GPU processors in these devices allowed my models to train approximately 30 times faster than on my personal machine. 
+
+\section{Model Selection}
+%final parameter search 
+
+\section{Results}
+
+\section{Discussion}
+%EE forecasting difficult because x y and z. nets show some promise when using methods x y and z. 
+
+
+
+
+%%%% TODO: Citations
+% Deep Learning (Goodfellow et al. 2016)
+% neuralnetworksanddeeplearning book by Nielsen (2017)
+% Hornik, stichombe, white universal approximation paper (1989)
+% Srivastava et al. (2014) - Dropout paper
+% Minsky and Papert (1969) - Perceptrons (book)
+% Raschka, kdnuggets 2016 http://www.kdnuggets.com/2016/08/role-activation-function-neural-network.html
+% Karpathy 2016 http://cs231n.github.io/neural-networks-1/
+% Lecun et al. 1998 - Efficient BackProp
+% Krizhevsky et al. 2012 - imagenet classification with deep convolutional . . . . 
+\end{document}
+
