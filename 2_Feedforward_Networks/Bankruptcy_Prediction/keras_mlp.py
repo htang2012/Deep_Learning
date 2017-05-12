@@ -17,115 +17,33 @@ import os
 
 seed = 0
 
-#data = pd.read_csv("/Users/jamesledoux/Documents/Research/deep_learning_book_notes/Data/LoanStats3b.csv")
-data = pd.read_csv("../../Data/LoanStats3b.csv")
-
-data = data[data.loan_status != 'Late (16-30 days)']
-data = data[data.loan_status != 'Late (31-120 days)']
-data = data[data.loan_status != 'In Grace Period']
-data = data[data.loan_status != 'Current']
-
-data['target'] = 0
-data.ix[data.loan_status == 'Default', 'target'] = 1
-data.ix[data.loan_status == 'Charged Off', 'target'] = 1
-
-data = data.drop('loan_status', 1)
-
-
-
-
-categoricals_to_drop = ['term', 'grade', 'emp_title', 'home_ownership', 'verification_status', \
-						'issue_d', 'url', 'desc', 'purpose', 'title', 'zip_code', 'addr_state', \
-						'earliest_cr_line', 'last_pymnt_d', 'next_pymnt_d', 'last_credit_pull_d',\
-						'emp_title', 'application_type', 'sub_grade', 'pymnt_plan', 'initial_list_status',\
-						'application_type']
-
-
-#scp LoanStats3b.csv ledouxja@136.167.92.85:/home/ledouxja
-
-temp = pd.get_dummies(data['term'])
-data['term'] = temp[' 36 months']
-
-grades = pd.get_dummies(data['grade'])
-data = pd.concat([data, grades], axis=1)
-
-grades = pd.get_dummies(data['sub_grade'])
-data = pd.concat([data, grades], axis=1)
-
-pymnt_plan = pd.get_dummies(data['pymnt_plan'])
-data = pd.concat([data, pymnt_plan], axis=1)
-
-data['int_rate'] = data['int_rate'].str.strip('%').astype(float)
-
-#titles = pd.get_dummies(data['emp_title']) #115k unique values.. can't do much with this. 
-#data = pd.concat([data, titles], axis=1)
-
-data.replace('n/a', np.nan,inplace=True)
-data.emp_length.fillna(value=0,inplace=True)
-data['emp_length'].replace(to_replace='[^0-9]+', value='', inplace=True, regex=True)
-data['emp_length'] = data['emp_length'].astype(int)
-
-ownership = pd.get_dummies(data['home_ownership'])
-data = pd.concat([data, ownership], axis=1)
-
-verification = pd.get_dummies(data['verification_status'])
-data = pd.concat([data, verification], axis=1)
-
-data['desc'] = data['desc'].str.len()
-
-
-purpose = pd.get_dummies(data['purpose'])
-data = pd.concat([data, purpose], axis=1)
-
-
-zip_code = pd.get_dummies(data['zip_code'])
-data = pd.concat([data, zip_code], axis=1)
-
-
-addr_state = pd.get_dummies(data['addr_state'])
-data = pd.concat([data, addr_state], axis=1)
-
-data['revol_util'] = data['revol_util'].str.strip('%').astype(float)
-
-initial_list_status = pd.get_dummies(data['initial_list_status'])
-data = pd.concat([data, initial_list_status], axis=1)
-
-
-application_type = pd.get_dummies(data['application_type'])
-data = pd.concat([data, application_type], axis=1)
-
-
-for col in categoricals_to_drop:
-	try:
-		data = data.drop(str(col), 1)
-	except:
-		pass
-
-#data.select_dtypes(include=['object'])
+path = '/Users/jamesledoux/Downloads/Dane/1year.csv'
+data = pd.read_csv(path)
 
 #shuffle rows 
 data = data.reindex(np.random.permutation(data.index)) #shuffle rows
 
 
 #loan_status
-y_data = data['target']
+y_data = data['class']
 
-data = data.drop('target', 1)
+data = data.drop('class', 1)
 #ensure everything is numeric
-for i in list(data):
-	data[i] = pd.to_numeric(data[i])
+#for i in list(data):
+#	data[i] = pd.to_numeric(data[i])
 
 #mean-impute missing values
 data = data.fillna(data.mean())
-data = data.fillna(0)
+#data = data.fillna(0)
 
 #data = data.reindex(np.random.permutation(data.index)) #shuffle rows
 #y_data = y_data.reindex(np.random.permutation(y_data.index)) 
+print("shape: ")
 print(data.shape)
 
 data.select_dtypes(include=['object'])
 
-data = pd.DataFrame(StandardScaler().fit_transform(data))
+#data = pd.DataFrame(StandardScaler().fit_transform(data))
 
 cutoff_val = int(np.floor(data.shape[0]*.8))
 train_x = data[0:cutoff_val]
@@ -147,6 +65,7 @@ test_y = pd.get_dummies(y_test)
 """
 
 # create model
+"""
 model = Sequential()
 model.add(Dense(512, input_dim=train_x.shape[1], init='normal', activation='relu'))
 model.add(Dense(512, input_dim=512, init='normal', activation='relu'))
@@ -156,6 +75,11 @@ model.add(Dense(256, input_dim=512, init='normal', activation='relu'))
 model.add(Dense(256, input_dim=256, init='normal', activation='relu'))
 model.add(Dense(256, input_dim=256, init='normal', activation='relu'))
 model.add(Dense(32, input_dim=256, init='normal', activation='relu'))
+model.add(Dense(1, input_dim=32, init='normal', activation='sigmoid'))
+"""
+model = Sequential()
+model.add(Dense(64, input_dim=train_x.shape[1], init='normal', activation='relu'))
+model.add(Dense(32, input_dim=64, init='normal', activation='relu'))
 model.add(Dense(1, input_dim=32, init='normal', activation='sigmoid'))
 # Compile model
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -174,13 +98,13 @@ test_x = np.matrix(test_x)
 test_y = np.asmatrix(test_y).T
 train_x.shape
 train_y.shape
-history = estimator.fit(train_x, train_y, validation_split=0.20, nb_epoch=10, batch_size=64, verbose=1)
+history = estimator.fit(train_x, train_y, validation_split=0.20, nb_epoch=50, batch_size=64, verbose=1)
 
 preds = model.predict(test_x)
 preds = np.round(preds)
-confusion_matrix = confusion_matrix(test_y, preds)
+#confusion_matrix = confusion_matrix(test_y, preds)
 print "mlp out of sample score: "
-print confusion_matrix
+print confusion_matrix(test_y, preds)
 
 
 

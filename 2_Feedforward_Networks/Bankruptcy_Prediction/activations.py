@@ -22,49 +22,13 @@ from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
 import os
 
-"""
-from Schapire:
-
-The algorithm trains the first learner, L1, one the original data set. 
-The second learner, L2, is trained on a set on which L1 has 50pct chance 
-to be correct (by sampling from the original distribution). The third learner, 
-L3, is trained on the cases on which L1 and L2 disagree. As output, return 
-the majority of the classifiers. See the paper to see why it improves the 
-classification.
-
-Now, for the application of the method of an imbalanced set: Assume the concept 
-is binary and the majority of the samples are classified as true.
-
-Let L1 return always true. L2 is being trained were L1 has 50pct chance to be right. 
-Since L1 is just true, L2 is being trained on a balanced data set. L3 is being 
-trained when L1 and L2 disagree, that is, when L2 predicts false. The ensemble 
-predicts by majority vote; hence, it predicts false only when both L2 and L3 
-predict false.
-
-NOTE: removed early stopping. I want to test regularization methods in isolation, not alongside 
-the other individual factors
-"""
-
-learning_rate=0.0001
-
 path = '/Users/jamesledoux/Downloads/Dane/1year.csv'
 data = pd.read_csv(path)
 data = data.drop('Unnamed: 0', 1) #this is meaningless
 
-# look at distributions
-#for i in data.columns[1:5]:
-#	data[i].hist(bins=20)
-#	plt.show()
-
-#look at summary stats
-#data.describe()
-
 #shuffle rows 
 seed = 0
 data = data.reindex(np.random.permutation(data.index)) #shuffle rows
-#loan_status (NOTE: imoprtant to do this before removing outliers, 
-# since this stp would remove the binary dependent variable for bankruptcy
-# if this were still in the dataframe
 y_data = data['class']
 data = data.drop('class', 1)
 
@@ -73,29 +37,16 @@ for col in data.columns:  #limit to the first few for now. takes a long time to 
 	iqr = data[col].quantile(.75) - data[col].quantile(.25)
 	upper_outlier_threshold = data[col].quantile(.75) + iqr*1.5
 	lower_outlier_threshold = data[col].quantile(.25) - iqr*1.5
-	#print '''{}: 
-	#lower outlier threshold: {}, 
-	#upper outlier threshold: {}'''.format(col, lower_outlier_threshold, upper_outlier_threshold)
 	data.loc[data[col]>upper_outlier_threshold, col] = upper_outlier_threshold
 	data.loc[data[col]<lower_outlier_threshold, col] = lower_outlier_threshold
 
 #mean-impute missing values
 data = data.fillna(data.mean())
 
-
-#revisit distributions
-#for i in data.columns[1:5] #again, limit this for sanity's sake. you get the picture after seeing a few. 
-#	data[i].hist(bins=20)
-#	plt.show()
-
 #scale to mean zero and unit variance 
 data = pd.DataFrame(scale(data))
 print("shape: ")
 print(data.shape)
-
-#data.select_dtypes(include=['object'])
-
-#data = pd.DataFrame(StandardScaler().fit_transform(data))
 
 cutoff_val = int(np.floor(data.shape[0]*.6))
 train_x = data[0:cutoff_val]
@@ -112,14 +63,15 @@ train_x.shape
 train_y.shape
 
 
-neuron_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+activations = ['relu', 'tanh', 'sigmoid']
 accuracies = []
-for n in neuron_counts:
-	print "training single-layer model with %d units" % n
-	sgd = SGD(lr=0.00001)
+for act in activations:
+	print "training model with {} activations".format(act)
 	model = Sequential()
-	model.add(Dense(n, input_dim=train_x.shape[1], init='normal', activation='relu'))
-	model.add(Dense(1, input_dim=n, init='normal', activation='sigmoid'))
+	model.add(Dense(128, input_dim=train_x.shape[1], init='normal', activation=act))
+	model.add(Dense(128, input_dim=128, init='normal', activation=act))
+	model.add(Dense(128, input_dim=128, init='normal', activation=act))
+	model.add(Dense(1, input_dim=128, init='normal', activation='sigmoid'))
 	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # Compile model
 
 	#checkpoint model to save best weights. load these for prediction

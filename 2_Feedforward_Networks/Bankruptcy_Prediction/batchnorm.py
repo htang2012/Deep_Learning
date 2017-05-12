@@ -1,13 +1,13 @@
+from __future__ import division
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.callbacks import EarlyStopping
 from keras.optimizers import SGD
-from keras.regularizers import l1
 from keras.wrappers.scikit_learn import KerasClassifier
+from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import LabelEncoder
@@ -18,31 +18,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegressionCV
+from keras.callbacks import ModelCheckpoint
 from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
 import os
 
-"""
-from Schapire:
-
-The algorithm trains the first learner, L1, one the original data set. 
-The second learner, L2, is trained on a set on which L1 has 50pct chance 
-to be correct (by sampling from the original distribution). The third learner, 
-L3, is trained on the cases on which L1 and L2 disagree. As output, return 
-the majority of the classifiers. See the paper to see why it improves the 
-classification.
-
-Now, for the application of the method of an imbalanced set: Assume the concept 
-is binary and the majority of the samples are classified as true.
-
-Let L1 return always true. L2 is being trained were L1 has 50pct chance to be right. 
-Since L1 is just true, L2 is being trained on a balanced data set. L3 is being 
-trained when L1 and L2 disagree, that is, when L2 predicts false. The ensemble 
-predicts by majority vote; hence, it predicts false only when both L2 and L3 
-predict false.
-"""
-
-learning_rate=0.0001
+act = 'relu'
+layer_size = 256
 
 path = '/Users/jamesledoux/Downloads/Dane/1year.csv'
 data = pd.read_csv(path)
@@ -51,9 +33,6 @@ data = data.drop('Unnamed: 0', 1) #this is meaningless
 #shuffle rows 
 seed = 0
 data = data.reindex(np.random.permutation(data.index)) #shuffle rows
-#loan_status (NOTE: imoprtant to do this before removing outliers, 
-# since this stp would remove the binary dependent variable for bankruptcy
-# if this were still in the dataframe
 y_data = data['class']
 data = data.drop('class', 1)
 
@@ -87,45 +66,23 @@ test_y = np.asmatrix(test_y).T
 train_x.shape
 train_y.shape
 
-
-sgd = SGD(lr=learning_rate)
-# model = Sequential()
-# model.add(Dense(128, input_dim=train_x.shape[1], init='normal', activation='relu'))
-# model.add(Dense(64, input_dim=128, init='normal', activation='relu'))
-# model.add(Dense(32, input_dim=64, init='normal', activation='relu'))
-# model.add(Dense(1, input_dim=32, init='normal', activation='sigmoid'))
-# model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # Compile model
-
-# weights_path = 'best_weights.hdf5'
-# mcp = ModelCheckpoint(weights_path, monitor="val_acc", mode='max',
-#                   save_best_only=True, save_weights_only=False, verbose=0) #verbose=1 is a good way to verify this is working
-# #callbacks_list = [EarlyStopping(monitor='binary_crossentropy', patience=15)]
-# history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=200, 
-# 	batch_size=64, verbose=0, callbacks=[mcp])
-
-reg_constant = 0.0003
-
+print "training baseline model with no batchnorm"
 model = Sequential()
-model.add(Dense(512, input_dim=train_x.shape[1], init='normal', activation='relu', W_regularizer=l1(reg_constant)))
-model.add(Dropout(.2))
-model.add(Dense(256, input_dim=512, init='normal', activation='relu', W_regularizer=l1(reg_constant)))
-model.add(Dropout(.2))
-model.add(Dense(128, input_dim=256, init='normal', activation='relu', W_regularizer=l1(reg_constant)))
-model.add(Dropout(.2))
-model.add(Dense(64, input_dim=128, init='normal', activation='relu', W_regularizer=l1(reg_constant)))
-model.add(Dropout(.2))
-model.add(Dense(1, input_dim=64, init='normal', activation='sigmoid', W_regularizer=l1(reg_constant)))
+model.add(Dense(layer_size, input_dim=train_x.shape[1], init='normal', activation=act))
+model.add(Dense(layer_size, input_dim=layer_size, init='normal', activation=act))
+model.add(Dense(layer_size, input_dim=layer_size, init='normal', activation=act))
+model.add(Dense(1, input_dim=layer_size, init='normal', activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # Compile model
 
+#checkpoint model to save best weights. load these for prediction
 weights_path = 'best_weights.hdf5'
 mcp = ModelCheckpoint(weights_path, monitor="val_acc", mode='max',
                   save_best_only=True, save_weights_only=False, verbose=0) #verbose=1 is a good way to verify this is working
 #callbacks_list = [EarlyStopping(monitor='binary_crossentropy', patience=15)]
-history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=300, 
-	batch_size=64, verbose=2, callbacks=[mcp])
+history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=200, 
+	batch_size=64, verbose=0, callbacks=[mcp])#, callbacks=callbacks_list)
 
-
-
+model.load_weights(weights_path) #load best weights from training
 preds = model.predict(test_x)
 preds = np.round(preds)
 #confusion_matrix = confusion_matrix(test_y, preds)
@@ -134,11 +91,10 @@ cm = confusion_matrix(test_y, preds)
 preds = preds.ravel()
 auc = roc_auc_score(test_y.reshape(-1).tolist()[0], preds.tolist())
 print cm
-print auc#"auc: %d" %auc
-acc = (float(cm[0][0]) + cm[1][1])/(cm[0][1] + cm[1][0] + cm[0][0] + cm[1][1])
+print 'auc: {}'.format(auc)#"auc: %d" %auc
+acc = (cm[0][0] + cm[1][1])/(cm[0][1] + cm[1][0] + cm[0][0] + cm[1][1])
 print acc
-
-#plot training history
+# summarize history for accuracy
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
 plt.title('model accuracy')
@@ -146,12 +102,60 @@ plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
-
 # summarize history for loss
-plt.plot(history.history['loss'][1:])
-plt.plot(history.history['val_loss'][1:])
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+
+for act in ['relu']:
+	print "training batchnorm model with {} activations".format(act)
+	model = Sequential()
+	model.add(Dense(layer_size, input_dim=train_x.shape[1], init='normal', activation=act))
+	model.add(BatchNormalization())
+	model.add(Dense(layer_size, input_dim=layer_size, init='normal', activation=act))
+	model.add(BatchNormalization())
+	model.add(Dense(layer_size, input_dim=layer_size, init='normal', activation=act))
+	model.add(BatchNormalization())
+	model.add(Dense(1, input_dim=layer_size, init='normal', activation='sigmoid'))
+	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # Compile model
+
+	#checkpoint model to save best weights. load these for prediction
+	weights_path = 'best_weights.hdf5'
+	mcp = ModelCheckpoint(weights_path, monitor="val_acc", mode='max',
+	                  save_best_only=True, save_weights_only=False, verbose=0) #verbose=1 is a good way to verify this is working
+	#callbacks_list = [EarlyStopping(monitor='binary_crossentropy', patience=15)]
+	history = model.fit(train_x, train_y, validation_split=0.20, nb_epoch=200, 
+		batch_size=64, verbose=0, callbacks=[mcp])#, callbacks=callbacks_list)
+
+	model.load_weights(weights_path) #load best weights from training
+	preds = model.predict(test_x)
+	preds = np.round(preds)
+	#confusion_matrix = confusion_matrix(test_y, preds)
+	print "mlp out of sample score: "
+	cm = confusion_matrix(test_y, preds)
+	preds = preds.ravel()
+	auc = roc_auc_score(test_y.reshape(-1).tolist()[0], preds.tolist())
+	print cm
+	print 'auc: {}'.format(auc)#"auc: %d" %auc
+	acc = (cm[0][0] + cm[1][1])/(cm[0][1] + cm[1][0] + cm[0][0] + cm[1][1])
+	print acc
+	# summarize history for accuracy
+	plt.plot(history.history['acc'])
+	plt.plot(history.history['val_acc'])
+	plt.title('model accuracy')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'test'], loc='upper left')
+	plt.show()
+	# summarize history for loss
+	plt.plot(history.history['loss'])
+	plt.plot(history.history['val_loss'])
+	plt.title('model loss')
+	plt.ylabel('loss')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'test'], loc='upper left')
+	plt.show()
