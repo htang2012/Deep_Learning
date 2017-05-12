@@ -468,6 +468,45 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 
 \subsection{Regularization: Weight Penalties}
 \subsection{Regularization: Batch Normalization}
+\par filler text
+
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{lll}
+             & Accuracy (\%) & AUC  \\
+No Batchnorm & 97.01         & 0.76 \\
+Batchnorm    & 97.19         & 0.79
+\end{tabular}
+\end{table}
+
+\par filler text 
+
+\begin{figure}[!htb]
+\minipage{0.45\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/bnorm-bline-relu-acc.png}
+  \caption{Training and Test Accuracy without Batch Normalization}\label{no-bn-acc}
+\endminipage\hfill
+\minipage{0.45\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/bnorm-relu-acc.png}
+  \caption{Training and Test Accuracy with Batch Normalization}\label{bn-acc}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.45\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/bnorm-bline-relu-loss.png}
+  \caption{Training and Test Loss without Batch Normalization}\label{no-bn-loss}
+\endminipage\hfill
+\minipage{0.45\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/bnorm-relu-loss.png}
+  \caption{Training and Test Loss with Batch Normalization}\label{bn-loss}
+\endminipage\hfill
+\end{figure}
+
+\par filler text. scales are deceiving on the accuracy plots. the loss one looks better with batch norm though. and performance improves, so that's nice. 
+
 \subsection{Optimization: Adaptive Learning Rates}
 \subsection{Optimization: Random Parameter search}
 - why it's better than grid search. free lunch!
