@@ -8,7 +8,10 @@
 \usepackage{lipsum}
 \usepackage{dsfont}
 \usepackage{graphicx}
+\usepackage{csvsimple}
+\usepackage{pgfplotstable,filecontents}
 \usepackage{float}
+\usepackage{tabularx}
 \usepackage{epstopdf}
 \usepackage{scalerel,stackengine}
 \usepackage{changepage}
@@ -157,8 +160,57 @@
 primer on extreme events and why they're hard to predict. why neural networks might be up to the task. 
 
 \section{Data}
-polish bankruptcy data overview. variables / financial ratios. time lag. 
-- preprocessing steps. outlier fixing because of crazy distributions seen in distressed companies' financial indicators. scaling so no variable dominates the others. de-meaning, scaling to unit variance. 
+\par The data used in this experiment were donated to the UCI Machine Learning Repository by Sebastian Tomczak. Tomczak donates data on the financial ratios of Polish companies, and a binary response variable for whether the company went bankrupt within a set number of years (Zieba, Tomczak, and Tomczak 2016). The donated data exists with varying time lags. For this study, I use only the five-year time lag, predicting the odds of a company going bankrupt within five years. This data consisted of 7027 observations, where each observation is a company. Of these 7027 companies, 271 (3.9\%) went bankrupt within the five year period that followed the reporting of the financial ratios in this data. Despite having a large number of observations, the small number of positive classifications (bankruptcy=1) posed a significant challenge during learning. 
+
+\par The financial ratios in the data are reported in Table 1.  
+
+\begin{table}[!h]
+\centering
+\caption{Independent Variables}
+\label{my-label}
+\resizebox{\textwidth}{!}{\begin{tabular}{llll}
+\hline
+ID  & Description                                                                                                              & ID  & Description                                                                                   \\ \hline
+X1  & net profit / total assets                                                                                                & X33 & operating expenses / short-term liabilities                                                   \\
+X2  & total liabilities / total assets                                                                                         & X34 & operating expenses / total liabilities                                                        \\
+X3  & working capital / total assets                                                                                           & X35 & profit on sales / total assets                                                                \\
+X4  & current assets / short-term liabilities                                                                                  & X36 & total sales / total assets                                                                    \\
+X5  & dropped for length & X37 & (current assets - inventories) / long-term liabilities                                        \\
+X6  & retained earnings / total assets                                                                                         & X38 & constant capital / total assets                                                               \\
+X7  & EBIT / total assets                                                                                                      & X39 & profit on sales / sales                                                                       \\
+X8  & book value of equity / total liabilities                                                                                 & X40 & (current assets - inventory - receivables) / short-term liabilities                           \\
+X9  & sales / total assets                                                                                                     & X41 & total liabilities / ((profit on operating activities + depreciation) * (12/365))              \\
+X10 & equity / total assets                                                                                                    & X42 & profit on operating activities / sales                                                        \\
+X11 & (gross profit + ext. items + fin. expenses) / tot. assets                                                 & X43 & rotation receivables + inventory turnover in days                                             \\
+X12 & gross profit / short-term liabilities                                                                                    & X44 & (receivables * 365) / sales                                                                   \\
+X13 & (gross profit + depreciation) / sales                                                                                    & X45 & net profit / inventory                                                                        \\
+X14 & (gross profit + interest) / total assets                                                                                 & X46 & (current assets - inventory) / short-term liabilities                                         \\
+X15 & (total liabilities * 365) / (gross profit + depreciation)                                                                & X47 & (inventory * 365) / cost of products sold                                                     \\
+X16 & (gross profit + depreciation) / total liabilities                                                                        & X48 & EBITDA (profit on operating activities - depreciation) / total assets                         \\
+X17 & total assets / total liabilities                                                                                         & X49 & EBITDA (profit on operating activities - depreciation) / sales                                \\
+X18 & gross profit / total assets                                                                                              & X50 & current assets / total liabilities                                                            \\
+X19 & gross profit / sales                                                                                                     & X51 & short-term liabilities / total assets                                                         \\
+X20 & (inventory * 365) / sales                                                                                                & X52 & (short-term liabilities * 365) / cost of products sold)                                       \\
+X21 & sales (n) / sales (n-1)                                                                                                  & X53 & equity / fixed assets                                                                         \\
+X22 & profit on operating activities / total assets                                                                            & X54 & constant capital / fixed assets                                                               \\
+X23 & net profit / sales                                                                                                       & X55 & working capital                                                                               \\
+X24 & gross profit (in 3 years) / total assets                                                                                 & X56 & (sales - cost of products sold) / sales                                                       \\
+X25 & (equity - share capital) / total assets                                                                                  & X57 & (current assets - inventory - ST liabilities) / (sales - GP - depreciation) \\
+X26 & (net profit + depreciation) / total liabilities                                                                          & X58 & total costs /total sales                                                                      \\
+X27 & profit on operating activities / financial expenses                                                                      & X59 & long-term liabilities / equity                                                                \\
+X28 & working capital / fixed assets                                                                                           & X60 & sales / inventory                                                                             \\
+X29 & logarithm of total assets                                                                                                & X61 & sales / receivables                                                                           \\
+X30 & (total liabilities - cash) / sales                                                                                       & X62 & (short-term liabilities *365) / sales                                                         \\
+X31 & (gross profit + interest) / sales                                                                                        & X63 & sales / short-term liabilities                                                                \\
+X32 & (current liabilities * 365) / cost of products sold                                                                      & X64 & sales / fixed assets                                                                          \\ \hline
+\end{tabular}}
+\end{table}
+
+\par In order to make this data useable for analysis, a few preprocessing steps are necessary. Most importantly, one must deal with the outlier problem before a model will be able to learn from this data. Extreme outliers are a common problem with financial data, particularly when dealing with distressed companies. A poor sales quarter or catastrophic loss of assets, for example, could move the denominator of one of the ratios in this data toward zero, causing a massive value for one or more features. To remedy this problem, I employ a strategy of data windorization as was performed in Fijorek and Grotowski (2012). This involves identifying observations that are more than 1.5 times the interquartile range outside one of a variable's outer quartiles, and replacing them with the upper (lower) quartile plus (minus) 1.5 times the interquartile range (Fijorek and Grotowski 2012). With extreme outliers modified, it was then possible for a model to identify signals of financial risk in the data. 
+\par Additional to the windorization procedure, I also scale all features to mean zero and unit variance. Last, I impute missing values with their column means. 
+
+\section{Performance Metric}
+\par Due to the nature of imbalanced data, accuracy is no longer an appropriate metric to optimize. Even a naive classifier that never predicts bankruptcy, for example, would achieve an accuracy score of almost 97\%. For this reason, I measure my results using the receiver operating characteristic (ROC). The ROC curve is created by plotting true positive rate against false positive rate at varying classification thresholds. The benefit of using this curve is that the area under the ROC curve (AUC score) is that it will not give a high score to a naive classifier with imbalanced data. This score is bounded between 0.5 and 1, where a higher score indicates a better model. A model that has learned nothing from the data will score close to 0.5, where a perfect model scores close to 1.0.  Intuitively, the AUC score represents the probability that a randomly chosen positive example will be ranked higher than a randomly chosen negative sample by the model (Tape, n.d.).
 
 \section{Neural Networks}
 \subsection{Theoretical Underpinnings}
@@ -194,7 +246,7 @@ polish bankruptcy data overview. variables / financial ratios. time lag.
 
 \par For these reasons, it is important to test for the optimal number of neurons per layer when fitting a neural network. Here I test the out of sample accuracy and AUC score of a single-layer model with layer sizes ranging between 4 and 1024 weights. All models had only one hidden layer, and were trained using the Adam optimizer with ReLU activation functions and the binary cross-entropy loss function (Table 1). 
 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{Relationship between Layer Size and Model Performance}
 \label{my-label}
@@ -213,9 +265,9 @@ Number of Neurons & Accuracy (\%) & AUC  \\
 \end{table}
 
 
-\par While the smaller layer sizes of 4 through 32 nodes per layer appear to be too little, showing sub-73\% AUC scores, all layer sizes above these values showed similar levels of success. Viewing the how the accuracy and loss scores changed during training, we can see that the model does not approach the ability to seriously overfit the data until it reaches 64 units per hidden layer (Figures 1 - 6). The ability to overfit is a desirable quality to have in a model, because this means that it is not missing out on accuracy due to under-fitting. Over-fitting in such models can be combatted by early stopping, regularization, or both. For this reason, a model should have at least 64 units per hidden layer when trained on this data set. Additionally, it is worth noting that adding nodes significantly increases training time.
+\par While the smaller layer sizes of 4 through 32 nodes per layer appear to be too little, showing sub-73\% AUC scores, all layer sizes above these values showed similar levels of success. Viewing the how the accuracy and loss scores changed during training, we can see that the model does not approach the ability to seriously overfit the data until it reaches 64 units per hidden layer (Figures 1 - 6). The ability to overfit is a desirable quality to have in a model, because this means that it is not missing out on accuracy due to under-fitting. Over-fitting in such models can be combatted by early stopping, regularization, or both. For this reason, a model should have at least 64 units [!h]per hidden layer when trained on this data set. Additionally, it is worth noting that adding nodes significantly increases training time.
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/neuron-16-acc.png}
   \caption{Training and Test Accuracy with 16 Neurons}\label{small-neuron}
@@ -233,7 +285,7 @@ Number of Neurons & Accuracy (\%) & AUC  \\
 
 \par more text 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/neuron-16-loss.png}
   \caption{Training and Test Loss with 16 Neurons}\label{small-neuron-loss}
@@ -255,7 +307,7 @@ Number of Neurons & Accuracy (\%) & AUC  \\
 \par For this reason, I test the impact of adding layers to a simple neural network. Using 64 units per layer, I test models with between one and eight hidden layers (Table 2). All models for this test use ReLU activation functions, the Adam optimizer, and binary cross entropy cost function. 
 
 %note: relu activations, adam optimizer, 64 units per layer 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{Relationship between Number of Layers and Model Performance}
 \label{my-label}
@@ -274,7 +326,7 @@ Number of Layers & Accuracy (\%) & AUC  \\
 
 \par Table 2 shows that adding layers to this model improves its performance until a certain point, and then begins to make it less accurate out of sample. This indicates that the reduced bias of the model is improving its performance when adding a second and third layer, but after this point it begins to overfit. This is the exact pattern one would expect due to the bias-variance tradeoff, because each added layer both reduces bias and increases variance. For this reason, adding layers to a model is not a catch-all solution. Here it appears that somewhere between three and five layers is optimal. 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/depth-1-acc.png}
   \caption{Training and Test Accuracy with 1 Layer}\label{1-layer}
@@ -290,7 +342,7 @@ Number of Layers & Accuracy (\%) & AUC  \\
 \end{figure}
 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/depth-1-loss.png}
   \caption{Training and Test Loss with 1 Layer}\label{1-layers}
@@ -331,7 +383,7 @@ making the function linear after $x=0,$ and equal to zero everywhere else. The m
 
 \par The results of testing these three activation functions are shown in Table 3. Each model in this table was a network with three hidden layers of 128 neurons each. 
 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{My caption}
 \label{my-label}
@@ -345,7 +397,7 @@ Sigmoid             & 97.43         & 0.70
 
 \par As expected, the sigmoidal units had the worst results of the three activation functions. The tanh and ReLU activations performed similar to one another, but the tanh activations had a smoother, more stable training curve than was observed in the ReLU model (Figures 13 - 18). 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/activation-tanh-acc.png}
   \caption{Training and Test Accuracy with Tanh Activations}\label{tanh-acc}
@@ -363,7 +415,7 @@ Sigmoid             & 97.43         & 0.70
 
 \par and more yet 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/activation-tanh-loss.png}
   \caption{Training and Test Loss with Tanh Activations}\label{tanh}
@@ -387,25 +439,25 @@ Sigmoid             & 97.43         & 0.70
 
 \par Here I test models using between-layer dropout of between 0 and 50\% of nodes. All models consisted of three hidden layers, each with 1024 units (Table X). All models used the Adam optimizer with hyperbolic tangent activation functions and the binary cross entropy cost function.
 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{Performance of Models using Dropout}
 \label{my-label}
 \begin{tabular}{lll}
 Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
-0                                   & 97.54         & 0.75 \\
-10                                  & 97.40         & 0.75 \\
-20                                  & 97.23         & 0.71 \\
-30                                  & 97.44         & 0.73 \\
-40                                  & 97.51         & 0.74 \\
-50                                  & 97.80         & 0.75
+0                          & 97.54         & 0.75 \\
+10                         & 97.40         & 0.75 \\
+20                         & 97.23         & 0.71 \\
+30                         & 97.44         & 0.73 \\
+40                         & 97.51         & 0.74 \\
+50                         & 97.80         & 0.75
 \end{tabular}
 \end{table}
 
 
 \par The results of this testing shown in Table 4 demonstrate the value of regularizing a large model. Despite placing significant constraints on the model during training, the model with half of its units dropped out during each training iteration was able to match the performance of the model using no dropout at all. While the zero and ten percent dropout models' relative success makes this a somewhat complicated set of results to interpret, we can see from the improvements shown from moving from 20 to 30, 30 to 40, and then 40 to 50\% dropout that adding additional regularization strength can improve the performance of a large model. 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/30-dropout-acc.png}
   \caption{Training and Test Accuracy with 30\% Dropout}\label{30-drop}
@@ -421,7 +473,7 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 \end{figure}
 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/30-dropout-loss.png}
   \caption{Training and Test Loss with 30\% Dropout}\label{30-drop-loss}
@@ -443,7 +495,7 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 \subsection{Regularization: Batch Normalization}
 \par filler text
 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{My caption}
 \label{my-label}
@@ -456,7 +508,7 @@ Batchnorm    & 97.19         & 0.79
 
 \par filler text 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.45\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/bnorm-bline-relu-acc.png}
   \caption{Training and Test Accuracy without Batch Normalization}\label{no-bn-acc}
@@ -467,7 +519,7 @@ Batchnorm    & 97.19         & 0.79
 \endminipage\hfill
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.45\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/bnorm-bline-relu-loss.png}
   \caption{Training and Test Loss without Batch Normalization}\label{no-bn-loss}
@@ -484,22 +536,22 @@ Batchnorm    & 97.19         & 0.79
 \par The final model-related strategy I test is learning rate procedure. While early neural networks were trained via either batch or stochastic gradient descent with set learning rates, almost all successful models today employ either an adaptive learning rate algorithm or some form of learning rate decay. The reason for employing these methods is that a larger learning rate is desirable early-on in training, as this allows the model to learn faster. As the model approaches a local optimum in its objective function, a smaller learning rate becomes desirable so that it can hone in on the optimal point and avoid leaving this section of the parameter space. For this reason, a variety of adaptive learning rate algorithms exist. For an overview of the available gradient descent optimization algorithms and how they work, see Ruder (2016). 
 \par Here I test a static learning rate, a decaying learning rate, and the popular adaptive learning rate algorithms Adam and RMSprop. The results of these tests are shown in Table 6. 
 
-\begin{table}[]
+\begin{table}[!h]
 \centering
 \caption{My caption}
 \label{my-label}
 \begin{tabular}{lll}
 Optimizer                    & Accuracy (\%) & AUC  \\
-SGD                          & 97.36         & 0.72 \\
+SGD                 & 97.36         & 0.72 \\
 SGD with Learning Rate Decay & 97.47         & 0.72 \\
-Adam                         & 97.79         & 0.78 \\
+Adam                & 97.79         & 0.78 \\
 RMSprop                      & 97.79         & 0.79
 \end{tabular}
 \end{table}
 
 \par Table 6 shows that smarter, adaptive learning rate algorithms can lead to significantly improved results. While the networks trained with stochastic gradient descent, both static and with learning rate decay, achieved AUC scores of 0.72, the models using the Adam and RMSprop optimizers achieved scores of 0.78 and 0.79 respectively. Turning to their training curves (Figures 29 - 34), RMSprop appears to have a slightly more reliable training process with less noise between training iterations. 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/opt3-sgd-acc.png}
   \caption{Accuracy with a Static Learning Rate (SGD)}\label{sgd-acc}
@@ -515,7 +567,7 @@ RMSprop                      & 97.79         & 0.79
 \end{figure}
 
 
-\begin{figure}[!htb]
+\begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/opt3-sgd-loss.png}
   \caption{Loss with a Static Learning Rate (SGD)}\label{sgd-loss}
@@ -530,24 +582,34 @@ RMSprop                      & 97.79         & 0.79
 \endminipage
 \end{figure}
 
-\subsection{Optimization: Random Parameter search}
-%- why it's better than grid search. free lunch!
-
 \subsection{Hardware}
 \par While not necessarily a model parameter, computer hardware is an important part of the training process. Because neural networks are slow to train compared to most other models, fitting large neural networks is often prohibitively slow on a personal computer. For this reason, I used the GPU-enabled devices in the Machine Learning Lab located in St. Mary's Hall. The NVIDIA Titan X GPU processors in these devices allowed my models to train approximately 30 times faster than on my personal machine. 
 
 \section{Model Selection}
 %final parameter search 
+\par To select the best model, I take what has worked best in the prior sections of this paper and run a final parameter search. Here I test 144 different models, varying:
+
+\begin{itemize}
+\item Dropout percentage (20, 30, 40, or 50\% of weights at each training iteration)
+\item Layer size (256, 512, or 1024 nodes in largest layer)
+\item Number of layers (3, 4, or 5 layers)
+\item Layer structure (N $\rightarrow$ N $\rightarrow$ N layer structure vs. N $\rightarrow$ (N/2) $\rightarrow$ (N/2)/2 structure.)
+\item Activation function (ReLU vs. RMSprop)
+\end{itemize}
+
+Additional to these parameters being varied, each model uses batch normalization between hidden layers.
 
 \section{Results}
+% best model: ReLU, 5 layers, 30% dropout, triangular structure, 1024 top-layer nodes, batch norm 
 
 \section{Discussion}
 %EE forecasting difficult because x y and z. nets show some promise when using methods x y and z. 
-
+% a strong improvement to earlier MLP results on this data, but significantly worse than the gradient boosted trees
 
 
 
 %%%% TODO: Citations
+% Zieba, Tomczak, and Tomczak 2016 - ensemble boosted trees for bankruptcy prediction 
 % Deep Learning (Goodfellow et al. 2016)
 % neuralnetworksanddeeplearning book by Nielsen (2017)
 % Hornik, stichombe, white universal approximation paper (1989)
@@ -558,5 +620,6 @@ RMSprop                      & 97.79         & 0.79
 % Lecun et al. 1998 - Efficient BackProp
 % Krizhevsky et al. 2012 - imagenet classification with deep convolutional . . . . 
 % Ruder 2016  - blog post on LR optimization algs http://sebastianruder.com/optimizing-gradient-descent/index.html#rmsprop
+% Tape, n.d. . Site explaining ROC curves. http://gim.unmc.edu/dxtests/
 \end{document}
 
