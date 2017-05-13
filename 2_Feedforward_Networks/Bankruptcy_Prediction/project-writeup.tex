@@ -160,30 +160,6 @@ primer on extreme events and why they're hard to predict. why neural networks mi
 polish bankruptcy data overview. variables / financial ratios. time lag. 
 - preprocessing steps. outlier fixing because of crazy distributions seen in distressed companies' financial indicators. scaling so no variable dominates the others. de-meaning, scaling to unit variance. 
 
-\section{Logistic Regression Benchmark}
-\subsection{Theoretical Underpinnings}
-We begin by defining the maximum likelihood estimator.  Let $(\Omega, \mathcal{A}, \mathbb{P})$ be a probability space, and define the random variable $Y:\Omega\to \R$ with probability density $f,$ which has a parameter $\theta$  Suppose we take a sample of size $n$ from the $Y$ distribution.  Then, we define the {\color{blue}likelihood function} as
-	\[Lik(\theta) = \prod_{i=1}^n f(Y_i),\]
-and the {\color{blue}log-likelihood function} as $\ell(\theta) = \log\prod_{i=1}^n f(Y_i)$.  Then, if we want to estimate the parameter $\theta,$ we need to find
-	\begin{equation}
-		\hat{\theta} = \arg\max_{t\in\Theta} \ell(t),
-	\end{equation}
-where $\Theta = \cb{t:t\text{ is a parameter for }Y}.$  This estimator $\hat{\theta}$ is called the {\color{blue}maximum likelihood estimator}. 
-\par We assume that $Y_i\sim\mathrm{Bernoulli}(p_i)$.  Then,
-	\[\Prob{Y_i = y} = p_i^y(1-p_i)^{1-y},\]
-for $y\in \cb{0,1}.$  Furthermore, suppose that $Y_i\perp Y_j$ for $i\neq j$.  Now, let $X:\Omega\to \R^{k}$ be a random vector on the same probability space, and suppose that we draw a sample of size $n$ from the $X$ distribution.  We want to estimate the parameter $\beta\in \R^{k+1}$ such that
-	\[\Prob{Y_i = 1| X_i} = \frac{1}{1+\exp\parens{-\ip{\beta}{X_i}}},\]
-where $\ip{\beta}{X_i} = \sum_{j=0}^{k}\beta_jx_{j,i},$ for $x_{0,i} = 1$ for all $i=1,2,\dots, n$.  We find the estimator $\hat{\beta}$ of $\beta$ by using ML estimation stated in (1).  For a regression of $Y$ onto $X$ for $X:\Omega\to \R$, we obtain a model that looks like the following graphic.
-
-%\begin{figure}
-	%[H]
-	%\centering
-	%\includegraphics[width = 0.8\textwidth]{logit_graphic.pdf}
-%\end{figure}
-
-\subsection{Results}
-- logit results
-
 \section{Neural Networks}
 \subsection{Theoretical Underpinnings}
 \par Deep feedforward networks, also called multilayer perceptrons (MLPs), were the first class of deep learning model developed in the 1970s.  The goal of a feedforward network is to approximate a function $f^{*},$ defining a mapping $y=f(x;\theta)$ that learns the best parameters $\theta$ for approximating $f^{*}$ (Goodfellow et al. 2016). 
@@ -332,10 +308,6 @@ Number of Layers & Accuracy (\%) & AUC  \\
 \par  Figures 7 - 12 show that adding layers makes a model prone to overfit earlier-on during training. The training procedure also becomes more complicated, as can be seen by the noisier patterns followed by the accuracy and loss lines of the networks with more than one hidden layer. Both of these problems can be partially remedied by regularization, which is tested in a different section of this paper. 
 
 \subsection{Activation Functions}
-% using a three layer network with 128 neurons/layer so the effects of the activations are more pronounced 
-% relu, sigmoid, tanh
-% tex each one of them. 
-
 \par An additional parameter important to a model's performance is its activation function. All weight-input products in a neural network are fed through a nonlinear activation function, as otherwise the network would produce a linear decision boundary (Raschka 2016). Different activation functions, however, exhibit different performance, with some being preferable to others. Here I test three different activations on this classification task.
 \par The first activation I test is the sigmoid function. The sigmoidal activation was the original deep learning activation function, being a nonlinear function that is already recognized by most, if not all, in the statistical learning field. The function is defined as:
 
@@ -357,7 +329,7 @@ $$ \text{ReLU}(X) = \text{max}(0,X), $$
 
 making the function linear after $x=0,$ and equal to zero everywhere else. The main benefit of the ReLU is that it's quick to compute, speeding up stochastic gradient descent by up to a factor of six (Krizhevsky et al. 2012). The downside, however, is that this unit can be fragile, with the units often "dying" and becoming stuck being equal to zero during training (Karpathy 2016).
 
-\par The results of testing these three activation functions are shown in Table 3. 
+\par The results of testing these three activation functions are shown in Table 3. Each model in this table was a network with three hidden layers of 128 neurons each. 
 
 \begin{table}[]
 \centering
@@ -371,7 +343,7 @@ Sigmoid             & 97.43         & 0.70
 \end{tabular}
 \end{table}
 
-\par and even more filler text, wow 
+\par As expected, the sigmoidal units had the worst results of the three activation functions. The tanh and ReLU activations performed similar to one another, but the tanh activations had a smoother, more stable training curve than was observed in the ReLU model (Figures 13 - 18). 
 
 \begin{figure}[!htb]
 \minipage{0.32\textwidth}
@@ -466,7 +438,8 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 
 \par Figures 19 through 24 show qualitatively the benefit of regularizing a neural network. First, we see that as additional dropout is added, the training and test accuracy curves move closer together. Second, we see that increasing the regularization of these models noticeably smooths out the test-loss curve, allowing loss to improve for a larger number of training steps and reducing the rate at which overfitting occurs as training continues. These are desirable qualities, indicating that dropping out 40 or 50\% of weights during training is an effective strategy for this model. 
 
-\subsection{Regularization: Weight Penalties}
+%  \subsection{Regularization: Weight Penalties} % TODO, time allowing 
+
 \subsection{Regularization: Batch Normalization}
 \par filler text
 
@@ -508,8 +481,58 @@ Batchnorm    & 97.19         & 0.79
 \par filler text. scales are deceiving on the accuracy plots. the loss one looks better with batch norm though. and performance improves, so that's nice. 
 
 \subsection{Optimization: Adaptive Learning Rates}
+\par The final model-related strategy I test is learning rate procedure. While early neural networks were trained via either batch or stochastic gradient descent with set learning rates, almost all successful models today employ either an adaptive learning rate algorithm or some form of learning rate decay. The reason for employing these methods is that a larger learning rate is desirable early-on in training, as this allows the model to learn faster. As the model approaches a local optimum in its objective function, a smaller learning rate becomes desirable so that it can hone in on the optimal point and avoid leaving this section of the parameter space. For this reason, a variety of adaptive learning rate algorithms exist. For an overview of the available gradient descent optimization algorithms and how they work, see Ruder (2016). 
+\par Here I test a static learning rate, a decaying learning rate, and the popular adaptive learning rate algorithms Adam and RMSprop. The results of these tests are shown in Table 6. 
+
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{lll}
+Optimizer                    & Accuracy (\%) & AUC  \\
+SGD                          & 97.36         & 0.72 \\
+SGD with Learning Rate Decay & 97.47         & 0.72 \\
+Adam                         & 97.79         & 0.78 \\
+RMSprop                      & 97.79         & 0.79
+\end{tabular}
+\end{table}
+
+\par Table 6 shows that smarter, adaptive learning rate algorithms can lead to significantly improved results. While the networks trained with stochastic gradient descent, both static and with learning rate decay, achieved AUC scores of 0.72, the models using the Adam and RMSprop optimizers achieved scores of 0.78 and 0.79 respectively. Turning to their training curves (Figures 29 - 34), RMSprop appears to have a slightly more reliable training process with less noise between training iterations. 
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt3-sgd-acc.png}
+  \caption{Accuracy with a Static Learning Rate (SGD)}\label{sgd-acc}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt2-adam-acc.png}
+  \caption{Accuracy with Adam Optimizer}\label{adam-acc}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt3-rmsprop-acc.png}
+  \caption{Accuracy with RMSprop Optimizer}\label{rmsprop-acc}
+\endminipage
+\end{figure}
+
+
+\begin{figure}[!htb]
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt3-sgd-loss.png}
+  \caption{Loss with a Static Learning Rate (SGD)}\label{sgd-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt3-adam-loss.png}
+  \caption{Loss with Adam Optimizer}\label{adam-loss}
+\endminipage\hfill
+\minipage{0.32\textwidth}
+  \includegraphics[width=\linewidth]{dl-paper/opt3-rmsprop-loss.png}
+  \caption{Loss with RMSprop Optimizer}\label{rmsprop-loss}
+\endminipage
+\end{figure}
+
 \subsection{Optimization: Random Parameter search}
-- why it's better than grid search. free lunch!
+%- why it's better than grid search. free lunch!
+
 \subsection{Hardware}
 \par While not necessarily a model parameter, computer hardware is an important part of the training process. Because neural networks are slow to train compared to most other models, fitting large neural networks is often prohibitively slow on a personal computer. For this reason, I used the GPU-enabled devices in the Machine Learning Lab located in St. Mary's Hall. The NVIDIA Titan X GPU processors in these devices allowed my models to train approximately 30 times faster than on my personal machine. 
 
@@ -534,5 +557,6 @@ Batchnorm    & 97.19         & 0.79
 % Karpathy 2016 http://cs231n.github.io/neural-networks-1/
 % Lecun et al. 1998 - Efficient BackProp
 % Krizhevsky et al. 2012 - imagenet classification with deep convolutional . . . . 
+% Ruder 2016  - blog post on LR optimization algs http://sebastianruder.com/optimizing-gradient-descent/index.html#rmsprop
 \end{document}
 
