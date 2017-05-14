@@ -157,7 +157,10 @@
 	\end{titlepage}
 
 \section{Introduction}
-primer on extreme events and why they're hard to predict. why neural networks might be up to the task. 
+%primer on extreme events and why they're hard to predict. why neural networks might be up to the task. 
+\par Binary classification is among the most common and useful statistical learning tasks. Countless problems exist in which it is beneficial to some party to be able to form a reliable estimation of whether an event will occur. A small subset of such problems include predicting whether a stock will increase in price, whether an image contains a human face,  and whether or not an email message is spam.
+\par A particularly challenging and valuable-if-solved class of binary classification problem is that of extreme event forecasting. Imbalanced data, in which one class is significantly more commonly observed than another, is difficult to model, as a trained model will very seldom predict a high probability of the rare event occurring. While extreme outcomes are challenging to predict in a binary dependent variable model, they are also often quite valuable if predicted reliably. The odds of a patient contracting a rare disease, and of an early-stage company eventually having a public offering, are both examples of extreme events with either life-and-death consequences or significant financial award attached to them. 
+\par In this paper, I test the ability of neural network models to predict one specific type of extreme event: bankruptcy. Bankruptcy is the perfect example of a problem that is both rarely observed and valuable to predict. Further, we are limited by the number of companies that exist and go bankrupt, making it nearly impossible to gather additional data on this problem. Given the constraints of the rarity of this event's occurrence and the relatively small and restricted amount of data that exists on the matter, an improvement in the state of the art for this problem could be of interest to financial professionals and academics alike. 
 
 \section{Data}
 \par The data used in this experiment were donated to the UCI Machine Learning Repository by Sebastian Tomczak. Tomczak donates data on the financial ratios of Polish companies, and a binary response variable for whether the company went bankrupt within a set number of years (Zieba, Tomczak, and Tomczak 2016). The donated data exists with varying time lags. For this study, I use only the five-year time lag, predicting the odds of a company going bankrupt within five years. This data consisted of 7027 observations, where each observation is a company. Of these 7027 companies, 271 (3.9\%) went bankrupt within the five year period that followed the reporting of the financial ratios in this data. Despite having a large number of observations, the small number of positive classifications (bankruptcy=1) posed a significant challenge during learning. 
@@ -214,9 +217,9 @@ X32 & (current liabilities * 365) / cost of products sold                       
 
 \section{Neural Networks}
 \subsection{Theoretical Underpinnings}
-\par Deep feedforward networks, also called multilayer perceptrons (MLPs), were the first class of deep learning model developed in the 1970s.  The goal of a feedforward network is to approximate a function $f^{*},$ defining a mapping $y=f(x;\theta)$ that learns the best parameters $\theta$ for approximating $f^{*}$ (Goodfellow et al. 2016). 
+\par Deep feedforward networks, also called multilayer perceptrons (MLPs), were the first class of deep learning model developed in the 1970s.  The goal of a feedforward network is to approximate a function $f^{*},$ defining a mapping $y=f(x;\theta)$ that learns the best parameters $\theta$ for approximating $f^{*}$ (goodfellow et al. 2017). 
 
-\par The "network" part of the name comes from the fact that a neural network is typically comprised of several stacked functions, commonly referred to as layers. Given functions $f^{1}, f^{2}, \text{ and } f^{3},$ for example, a feedforward network could be defined as $f^{3}(f^{2}(f^{1})),$ where the output of $f^{1}$ is fed into $f^{2},$ which is then fed into $f^{3},$ which in turn produces the network's output. The initial layer of this network, which receives the input data, is called the input layer. The final layer, producing the output, is referred to as the output layer. All layers in-between these two are referred to as hidden layers (Goodfellow et al. 2016). In the case of binary classification tasks such as that being attempted in this paper, the final layer will be a sigmoid function that takes the output of the model's penultimate layer and feed it through a function bounded between zero and one. 
+\par The "network" part of the name comes from the fact that a neural network is typically comprised of several stacked functions, commonly referred to as layers. Given functions $f^{1}, f^{2}, \text{ and } f^{3},$ for example, a feedforward network could be defined as $f^{3}(f^{2}(f^{1})),$ where the output of $f^{1}$ is fed into $f^{2},$ which is then fed into $f^{3},$ which in turn produces the network's output. The initial layer of this network, which receives the input data, is called the input layer. The final layer, producing the output, is referred to as the output layer. All layers in-between these two are referred to as hidden layers (goodfellow et al. 2017). In the case of binary classification tasks such as that being attempted in this paper, the final layer will be a sigmoid function that takes the output of the model's penultimate layer and feed it through a function bounded between zero and one. 
 
 \par Similar to other machine-learned models, a feedforward network learns by gradient descent; that is, by iteratively updating its weights according to the gradient of a cost function that it attempts to optimize. The key difference between gradient descent in neural networks and in simpler algorithms is that the stacked nature of a neural network's layers and weights means that additional steps are required in order to compute the gradients with respect to each layer's weights. The learning procedure for a feedforward network, in brief, is: 
 
@@ -227,12 +230,12 @@ X32 & (current liabilities * 365) / cost of products sold                       
   
    \item \textbf{Calculate Cost Function:} given model output $\hat{y}$ and target value $y$, calculate the model's cost function $C(\hat{y}, y),$ where $C$ can be the mean squared error, accuracy, cross entropy, or any other cost function. 
  
-   \item \textbf{Backpropagate the Error:} for each layer $l=L-1, L-2, ..., 2$ compute the error $\delta^{l}=((w^{l+1})^T\delta^{l+1})\odot \sigma^{\prime}z^{l},$ where $\sigma$ is the activation function and $z^l$ is the weighted input to the neurons in layer $l$. Effectively, what this is doing is taking the known error at layer $l+1$ and propagating it backward through the weights and activation functions of the previous layers of the network. This allows us to calculate the gradient of the cost function $\frac{\partial{C}}{\partial{w^{l}_{jk}}}$ where $l$ represents a layer and $k$ represents an individual weight (Nielsen 2017). 
+   \item \textbf{Backpropagate the Error:} for each layer $l=L-1, L-2, ..., 2$ compute the error $\delta^{l}=((w^{l+1})^T\delta^{l+1})\odot \sigma^{\prime}z^{l},$ where $\sigma$ is the activation function and $z^l$ is the weighted input to the neurons in layer $l$. Effectively, what this is doing is taking the known error at layer $l+1$ and propagating it backward through the weights and activation functions of the previous layers of the network. This allows us to calculate the gradient of the cost function $\frac{\partial{C}}{\partial{w^{l}_{jk}}}$ where $l$ represents a layer and $k$ represents an individual weight (Nielsen 2015). 
     
    \item \textbf{Update Weights:} with the gradient of the cost function now calculated with respect to each hidden unit, perform the standard gradient descent step of either adding or subtracting the product of the model's learning rate and weights to the pre-existing weights at each layer. Whether this is an addition or subtraction step depends on whether the cost function is being maximized or minimized. 
 \end{enumerate}
 
-\par For an in-depth discussion of the backpropagation algorithm, see Nielsen (2017). Many different specifications of these models exist, some of which will be discussed in the following section. 
+\par For an in-depth discussion of the backpropagation algorithm, see Nielsen (2015). Many different specifications of these models exist, some of which will be discussed in the following section. 
 
 \section{Hyperparameter Tuning and Model Architectures}
 \par I test a variety of different network architectures for this extreme-event binary classification task, tuning the models' respective hyperparameters in order to achieve optimal performance. In line with universal approximation theorem's claim that the size and quantity of layers affects model accuracy, I begin by testing model size and depth (Hornik et al. 1989). I test three different between-layer activation functions as well, as these play an important role in learning. In order to achieve better out-of-sample generalization, I test two different regularization strategies: Dropout and batch normalization. Finally, in an attempt to achieve an efficient learning procedure, I also test various optimization procedures, including stochastic gradient descent and the adaptive learning rate algorithms Adam and RMSprop. Gaining an idea of what might be successful from these tests, I run a final parameter search over the architectures and parameters that have shown promise in order to see which model specification will be most successful.
@@ -348,7 +351,7 @@ Number of Layers & Accuracy (\%) & AUC  \\
   \includegraphics[width=\linewidth]{dl-paper/depth-2-loss.png}
   \caption{Training and Test Loss with 2 Layers}\label{2-layers}
 \endminipage\hfill
-\minipage{0.32\textwidth}%
+\minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/depth-3-loss.png}
   \caption{Training and Test Loss with 3 Layers}\label{3-layers}
 \endminipage
@@ -426,10 +429,10 @@ Sigmoid             & 97.43         & 0.70
 
 
 \subsection{Regularization: Dropout}
-\par My next consideration in model-building was regularization. Regularization works by trading increased bias for reduced variance, serving as a remedy to the overfitting problem. A tried and true strategy for building successful neural networks is to use large, appropriately regularized models (Goodfellow et al. 2016). 
+\par My next consideration in model-building was regularization. Regularization works by trading increased bias for reduced variance, serving as a remedy to the overfitting problem. A tried and true strategy for building successful neural networks is to use large, appropriately regularized models (goodfellow et al. 2017). 
 \par The first regularization strategy I test is Dropout. First introduced by Srivastava et al. (2014), Dropout provides a method for regularizing a broad family of models. This method works by "dropping out" a fixed percentage of nodes at random during each training iteration, forcing those weights to equal zero. The impact of dropping out nodes at random in this way is that it forces the network to learn representations of the data in its hidden layers that are robust to missing or modified information. If a network is being trained to recognize faces in images, for example, the network cannot learn to rely too heavily on an individual neuron that has learned to recognize individual features in the data such as noses or ears. If this individual neuron is required for the model's success and it is dropped out, the model will have poor performance. As a result of this constraint, models trained using a dropout strategy must either learn more robust representations of features (i.e. have multiple nodes serve the purpose of recognizing a nose on a face, rather than just one), or learn more general representations of the data that still hold predictive accuracy on previously unseen data with potentially different properties (i.e. being able to recognize a face without a nose).  
 
-\par If we consider each combination of non-dropped-out weights to be a unique model, this regularization strategy can then be viewed as a bagging method, where each iteration trains a unique model that shares parameters with every other model (Goodfellow et al. 2016). Each iteration, borrowing some weights from the previous model and given a fresh set of constraints via its new set of dropped-out nodes, is encouraged to learn something slightly different than the previous. The end result is often a model with superior generalization to unseen data. Dropout increases a model's bias due to the constraints imposed by setting nodes equal to zero during training, but also decreases its variance for this same reason. 
+\par If we consider each combination of non-dropped-out weights to be a unique model, this regularization strategy can then be viewed as a bagging method, where each iteration trains a unique model that shares parameters with every other model (goodfellow et al. 2017). Each iteration, borrowing some weights from the previous model and given a fresh set of constraints via its new set of dropped-out nodes, is encouraged to learn something slightly different than the previous. The end result is often a model with superior generalization to unseen data. Dropout increases a model's bias due to the constraints imposed by setting nodes equal to zero during training, but also decreases its variance for this same reason. 
 
 \par Here I test models using between-layer dropout of between 0 and 50\% of nodes. All models consisted of three hidden layers, each with 1024 units (Table 5). All models used the Adam optimizer with hyperbolic tangent activation functions and the binary cross entropy cost function.
 
@@ -485,8 +488,8 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 \par Figures 19 through 24 show qualitatively the benefit of regularizing a neural network. First, we see that as additional dropout is added, the training and test accuracy curves move closer together. Second, we see that increasing the regularization of these models noticeably smooths out the test-loss curve, allowing loss to improve for a larger number of training steps and reducing the rate at which overfitting occurs as training continues past the optimal point. These are desirable qualities, indicating that dropping out 40 or 50\% of weights during training is an effective strategy for this model. 
 
 \subsection{Regularization: Batch Normalization}
-\par Part of the challenge of learning in neural models is the fact that the distribution of each layer's inputs is constantly changing during training, being dependent on both the outputs of prior layers in the network and the specific batch of data passing through the training iteration. Szegedy and Ioffe (2015) refer to this problem as internal covariate shift. Batch normalization is an attempt to remedy this by normalizing the inputs to each layer before the data are passed through its affine transformation and activation function (Szegedy and Ioffe 2015).
-\par Batch normalization is said to both reduce the number of training iterations required in order to find an optimal model and also improve out of sample accuracy (Szegedy and Ioffe 2015). Further, this method is also said to have a regularizing effect, improving generalization by making individual training iterations less dependent on the specific data drawn in that particular iteration (Szegedy and Ioffe 2015).  
+\par Part of the challenge of learning in neural models is the fact that the distribution of each layer's inputs is constantly changing during training, being dependent on both the outputs of prior layers in the network and the specific batch of data passing through the training iteration. Ioffe and Szegedy (2015) refer to this problem as internal covariate shift. Batch normalization is an attempt to remedy this by normalizing the inputs to each layer before the data are passed through its affine transformation and activation function (Ioffe and Szegedy 2015).
+\par Batch normalization is said to both reduce the number of training iterations required in order to find an optimal model and also improve out of sample accuracy (Ioffe and Szegedy 2015). Further, this method is also said to have a regularizing effect, improving generalization by making individual training iterations less dependent on the specific data drawn in that particular iteration (Ioffe and Szegedy 2015).  
 
 \begin{table}[!h]
 \centering
@@ -594,24 +597,40 @@ Additional to these parameters being varied, each model uses batch normalization
 \par Of the 144 models tested, the most successful was a model with five hidden layers, containing 1024, 512, 256, 128, and 64 nodes respectively. The model uses a 30\% dropout rate and also uses batch normalization between each hidden layer. This model achieved a 98.51\% accuracy score with an impressive AUC score of 0.83. 
 
 \section{Discussion}
-%EE forecasting difficult because x y and z. nets show some promise when using methods x y and z. 
-% a strong improvement to earlier MLP results on this data, but significantly worse than the gradient boosted trees
+\par The best model in this paper achieves an accuracy of 98.51\% and an AUC score of 0.83. This is a considerable improvement to other prior results obtained on this data using similar neural models. Zieba, Tomczak, and Tomczak (2016), for example, see mean AUC scores between 0.54 and 0.70 for neural network models used on the same bankruptcy datasets used in this paper. The perceptrons used by Zieba, Tomczak, and Tomczak (2016) are simpler models, with only one hidden layer, so this paper in part shows the benefit of having a large, appropriately regularized model. 
+\par It is important to note, however, that non-neural models show even better performance on this data.  Zieba, Tomczak, and Tomczak (2016) report AUC scores of up to 0.96 for gradient-boosted tree models, showing that such models are better suited to this particular task. The final takeaway of this project, then, is that while neural networks are not a cure-all solution to difficult classification tasks, they can still achieve strong out of sample performance if properly trained. By training large regularized models with normalization between layers, strong out of sample prediction  with neural networks is indeed possible, even in highly imbalanced data sets. 
 
 
+  \begin{thebibliography}{1}
 
-%%%% TODO: Citations
-% Zieba, Tomczak, and Tomczak 2016 - ensemble boosted trees for bankruptcy prediction 
-% Deep Learning (Goodfellow et al. 2016)
-% neuralnetworksanddeeplearning book by Nielsen (2017)
-% Hornik, stichombe, white universal approximation paper (1989)
-% Srivastava et al. (2014) - Dropout paper
-% Minsky and Papert (1969) - Perceptrons (book)
-% Raschka, kdnuggets 2016 http://www.kdnuggets.com/2016/08/role-activation-function-neural-network.html
-% Karpathy 2016 http://cs231n.github.io/neural-networks-1/
-% Lecun et al. 1998 - Efficient BackProp
-% Krizhevsky et al. 2012 - imagenet classification with deep convolutional . . . . 
-% Ruder 2016  - blog post on LR optimization algs http://sebastianruder.com/optimizing-gradient-descent/index.html#rmsprop
-% Tape, n.d. . Site explaining ROC curves. http://gim.unmc.edu/dxtests/
-% Szegedy and Ioffe 2015 batch norm internal covaraite shift 
+  \bibitem{bankruptcy} Zieba, Maciej, Sebastian K. Tomczak, and Jakub M. Tomczak {\em Ensemble boosted trees with synthetic features generation in application to bankruptcy prediction.}  Expert Systems with Applications 58 (2016): 93-101. Web
+  
+  \bibitem{dlbook}  Goodfellow, Ian, Yoshua Bengio, and Aaron Courville {\em Deep learning} Cambridge, MA: The MIT Press, 2017.
+  
+  \bibitem{otherdlbook} Nielsen, Michael A. {\em Neural Networks and Deep Learning.} Determination Press, 2015.
+  
+  \bibitem{univapproxthm} Hornik, Kurt, Maxwell Stinchcombe, and Halbert White. {\em Multilayer feedforward networks are universal approximators.} Neural Networks 2.5 (1989): 359-66. Web.
+  
+  \bibitem{dropout} Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. {\em Dropout:  A Simple Way to Prevent Neural Networks fromOverfitting.} Journal of Machine Learning Research 15 (2014). Web. 
+  
+  \bibitem{minskybook} Minsky, Marvin,  Seymour Papert. {\em Perceptrons: An Introduction to Computational Geometry.} Cambridge, MA: The MIT Press, 1969.
+
+  
+  \bibitem{kdpost} Raschka, Sebastian. {\em What is the Role of the Activation Function in a Neural Network?} KDnuggets Analytics Big Data Data Mining and Data Science. N.p., 2016. Web. 
+  
+  \bibitem{karpathy} Karpathy, Andrej. "Convolutional Neural Networks for Visual Recognition." CS231n Lecture Notes, 2016. Web.
+  
+  \bibitem{backpropjlc} Lecun, Yann, Leon Bottou, Genevieve B. Orr, and Klaus -Robert Müller. {\em Efficient BackProp.} Lecture Notes in Computer Science Neural Networks: Tricks of the Trade (1998): 9-50. Web.
+  
+  \bibitem{other} Krizhevsky, Alex, Ilya Sutskever, Geoffrey Hinton. {\em ImageNet Classification with Deep Convolutional Neural Networks.} In NIPS, pp. 1106?1114, 2012
+  
+  \bibitem{blogpost} Ruder, Sebastian. {\em An overview of gradient descent optimization algorithms.} Sebastian Ruder. Sebastian Ruder, 18 Apr. 2017. Web.   
+  
+  \bibitem{aucpost} Tape, Thomas. {\em Interpreting Diagnostic Tests.|} Likelihood Ratios. N.p., n.d. Web. 
+  
+  \bibitem{batchnormpaper} Ioffe, Servey, Christian Szegedy. {\em Batch normalization: Accelerating deepnetwork training by reducing internal covariate shift.} InICML, 2015
+  
+    \end{thebibliography}
+    
 \end{document}
 
