@@ -218,7 +218,7 @@ X32 & (current liabilities * 365) / cost of products sold                       
 
 \par The "network" part of the name comes from the fact that a neural network is typically comprised of several stacked functions, commonly referred to as layers. Given functions $f^{1}, f^{2}, \text{ and } f^{3},$ for example, a feedforward network could be defined as $f^{3}(f^{2}(f^{1})),$ where the output of $f^{1}$ is fed into $f^{2},$ which is then fed into $f^{3},$ which in turn produces the network's output. The initial layer of this network, which receives the input data, is called the input layer. The final layer, producing the output, is referred to as the output layer. All layers in-between these two are referred to as hidden layers (Goodfellow et al. 2016). In the case of binary classification tasks such as that being attempted in this paper, the final layer will be a sigmoid function that takes the output of the model's penultimate layer and feed it through a function bounded between zero and one. 
 
-\par Similar to other machine-learned models, a feedforward network learns by gradient descent; that is, by iteratively updating its weights according to the gradient of a cost function that it attempts to optimize. The key difference between gradient descent in neural networks and in simpler algorithms is that the stacked nature of a neural network's layers and weights means that additional steps are required in order to compute these gradients. The learning procedure for a feedforward network, in brief, is: 
+\par Similar to other machine-learned models, a feedforward network learns by gradient descent; that is, by iteratively updating its weights according to the gradient of a cost function that it attempts to optimize. The key difference between gradient descent in neural networks and in simpler algorithms is that the stacked nature of a neural network's layers and weights means that additional steps are required in order to compute the gradients with respect to each layer's weights. The learning procedure for a feedforward network, in brief, is: 
 
 % source: http://neuralnetworksanddeeplearning.com/chap2.html (remember to cite this book)
 % Nielsen (2017)
@@ -232,19 +232,19 @@ X32 & (current liabilities * 365) / cost of products sold                       
    \item \textbf{Update Weights:} with the gradient of the cost function now calculated with respect to each hidden unit, perform the standard gradient descent step of either adding or subtracting the product of the model's learning rate and weights to the pre-existing weights at each layer. Whether this is an addition or subtraction step depends on whether the cost function is being maximized or minimized. 
 \end{enumerate}
 
-\par For an in-depth discussion of the backpropagation algorithm, see Nielsen (2017). Many specifications of these models exist, which will be discussed in the following section. 
+\par For an in-depth discussion of the backpropagation algorithm, see Nielsen (2017). Many different specifications of these models exist, some of which will be discussed in the following section. 
 
 \section{Hyperparameter Tuning and Model Architectures}
-\par In order to build a neural binary classification model of bankruptcies, I test a variety of different network architectures, tuning their respective hyperparameters in order to achieve optimal performance. In line with universal approximation theorem's claim that the size and quantity of layers affects model accuracy, I begin by testing model size and depth (Hornik et al. 1989), testing differing between-layer activation functions as well. In order to achieve better out-of-sample generalization, I test three different regularization strategies: Dropout, weight penalties, and batch normalization. Finally, in an attempt to achieve an efficient learning procedure, I also test various optimization procedures, including stochastic gradient descent and the adaptive learning rate algorithms ADAM and RMSprop. Gaining an idea of what might be successful from these tests, I run a final parameter search over the architectures and parameters that have shown promise in order to see which  combination of parameters and architecture is most successful. 
+\par I test a variety of different network architectures for this extreme-event binary classification task, tuning the models' respective hyperparameters in order to achieve optimal performance. In line with universal approximation theorem's claim that the size and quantity of layers affects model accuracy, I begin by testing model size and depth (Hornik et al. 1989). I test three different between-layer activation functions as well, as these play an important role in learning. In order to achieve better out-of-sample generalization, I test two different regularization strategies: Dropout and batch normalization. Finally, in an attempt to achieve an efficient learning procedure, I also test various optimization procedures, including stochastic gradient descent and the adaptive learning rate algorithms Adam and RMSprop. Gaining an idea of what might be successful from these tests, I run a final parameter search over the architectures and parameters that have shown promise in order to see which model specification will be most successful.
 
 \subsection{Layer Size}
 \par Universal approximation theorem shows that neural networks are universal function approximators. This means that, given a sufficient number of neurons, a neural network can achieve any desired level of accuracy on a dataset (Hornik et al. 1989). 
 
-\par Adding neurons to a neural network, however, is not a free lunch. First, while it is theoretically possible to approximate any function with this class of model, the number of neurons required to do so may be prohibitively large. Neural models become increasingly challenging and slow to train as weights are added, so this becomes problematic as the number of neurons per layer enters the thousands. 
+\par Adding weights to a neural network, however, is not a free lunch. First, while it is theoretically possible to approximate any function with this class of model, the number of weights required to do so may be prohibitively large. Neural models become increasingly challenging and slow to train as weights are added, so this becomes problematic as the number of neurons per layer enters the thousands. 
 
-\par Second, universal approximation theorem only apply to in-sample accuracy. While a function can be approximated to an arbitrary degree of accuracy in sample, this does not guarantee strong out of sample performance. A perfectly fit model in-sample, after all, is often overfit. 
+\par Second, universal approximation theorem only applies to in-sample accuracy. While a function can be approximated to an arbitrary degree of accuracy in-sample, this does not guarantee strong out of sample performance. A perfectly fit model within-sample, after all, is likely overfit. 
 
-\par For these reasons, it is important to test for the optimal number of neurons per layer when fitting a neural network. Here I test the out of sample accuracy and AUC score of a single-layer model with layer sizes ranging between 4 and 1024 weights. All models had only one hidden layer, and were trained using the Adam optimizer with ReLU activation functions and the binary cross-entropy loss function (Table 1). 
+\par For these reasons, it is important to test for the optimal number of weights per layer. Here I test the out of sample accuracy and AUC score of a single-layer model with layer sizes ranging between 4 and 1024 weights. All models had only one hidden layer, and were trained using the Adam optimizer (see section 5.6) with ReLU activation functions (section 5.2) and the binary cross-entropy loss function (Table 2).
 
 \begin{table}[!h]
 \centering
@@ -265,7 +265,7 @@ Number of Neurons & Accuracy (\%) & AUC  \\
 \end{table}
 
 
-\par While the smaller layer sizes of 4 through 32 nodes per layer appear to be too little, showing sub-73\% AUC scores, all layer sizes above these values showed similar levels of success. Viewing the how the accuracy and loss scores changed during training, we can see that the model does not approach the ability to seriously overfit the data until it reaches 64 units per hidden layer (Figures 1 - 6). The ability to overfit is a desirable quality to have in a model, because this means that it is not missing out on accuracy due to under-fitting. Over-fitting in such models can be combatted by early stopping, regularization, or both. For this reason, a model should have at least 64 units [!h]per hidden layer when trained on this data set. Additionally, it is worth noting that adding nodes significantly increases training time.
+\par While the smaller layer sizes of 4 through 32 nodes per layer appear to be too little, showing sub-73\% AUC scores, all layer sizes above these values showed similar levels of success. Viewing the how the accuracy and loss scores changed during training, we can see that the model does not approach the ability to seriously overfit the data until it reaches 64 units per hidden layer (Figures 1 - 6). The ability to overfit is a desirable quality to have in a model, because this means that it is not missing out on accuracy due to under-fitting. Over-fitting in such models can be combatted by early stopping, regularization, or both. For this reason, a model should have at least 64 units per hidden layer when trained on this data set. It is worth noting, however, that adding nodes significantly increases training time.
 
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
@@ -281,9 +281,6 @@ Number of Neurons & Accuracy (\%) & AUC  \\
   \caption{Training and Test Accuracy with 64 Neurons}\label{large-neuron}
 \endminipage
 \end{figure}
-
-
-\par more text 
 
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
@@ -302,9 +299,9 @@ Number of Neurons & Accuracy (\%) & AUC  \\
 
 \subsection{Number of Layers}
 
-\par Adding additional layers allows a model to learn more complex, nonlinear patterns in the data. A simple early example of this in the literature is the XOR problem. The "exclusive or", otherwise called XOR, is a binary classification problem where, given two values $x$ and $y$, a point is only classified as true when one, but not both values equal one. Minsky and Papert (1969) show that a single-layer neural network is incapable of solving this problem, as the classes are not linearly separable. Adding additional layers to such a model, however, introduces the nonlinearity required in order to solve such a problem. 
-\par While not all deep learning tasks are simple two-dimensional classification problems, the XOR example serves as a minimal example of how adding layers to a network may help. Adding layers to a network allows a model to learn more complex interactions between features, providing more of an opportunity for the model to learn the underlying structure of the training data. 
-\par For this reason, I test the impact of adding layers to a simple neural network. Using 64 units per layer, I test models with between one and eight hidden layers (Table 2). All models for this test use ReLU activation functions, the Adam optimizer, and binary cross entropy cost function. 
+\par Adding layers to a model allows it to learn increasingly complex, nonlinear patterns in the data. An early example of this from the literature is the XOR problem. The "exclusive or", otherwise referred to as XOR, is a binary classification problem where, given two values $x$ and $y$, a point is only classified as true when one, but not both values equal one. Minsky and Papert (1969) show that a single-layer neural network is incapable of solving this problem, as the classes are not linearly separable. Adding additional layers to such a model, however, introduces the nonlinearity required in order to solve this problem. 
+\par While not all deep learning tasks are as simple as this two-dimensional classification example, the XOR problem serves as a minimal example of how adding layers to a network may help to solve complex tasks. Adding layers to a network allows a model to learn more complex interactions between features, providing more of an opportunity for the model to learn the underlying structure of the training data. 
+\par For this reason, I test the impact of adding layers to a simple neural network. Using 64 weights per layer, I test models with between one and eight hidden layers (Table 3). All models for this test use ReLU activation functions, the Adam optimizer, and the binary cross entropy cost function. 
 
 %note: relu activations, adam optimizer, 64 units per layer 
 \begin{table}[!h]
@@ -324,7 +321,7 @@ Number of Layers & Accuracy (\%) & AUC  \\
 \end{tabular}
 \end{table}
 
-\par Table 2 shows that adding layers to this model improves its performance until a certain point, and then begins to make it less accurate out of sample. This indicates that the reduced bias of the model is improving its performance when adding a second and third layer, but after this point it begins to overfit. This is the exact pattern one would expect due to the bias-variance tradeoff, because each added layer both reduces bias and increases variance. For this reason, adding layers to a model is not a catch-all solution. Here it appears that somewhere between three and five layers is optimal. 
+\par Table 3 shows that adding layers to this model improves its performance until a certain point, and then begins to make it less accurate out of sample. This indicates that the reduced bias of the model is improving its performance when adding a second and third layer, but after this point it begins to overfit. This is the exact pattern one would expect due to the bias-variance tradeoff, because each added layer both reduces bias and increases variance. For this reason, adding layers to a model is not a catch-all solution. Here it appears that somewhere between three and five layers is optimal. 
 
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
@@ -357,11 +354,11 @@ Number of Layers & Accuracy (\%) & AUC  \\
 \endminipage
 \end{figure}
 
-\par  Figures 7 - 12 show that adding layers makes a model prone to overfit earlier-on during training. The training procedure also becomes more complicated, as can be seen by the noisier patterns followed by the accuracy and loss lines of the networks with more than one hidden layer. Both of these problems can be partially remedied by regularization, which is tested in a different section of this paper. 
+\par  Figures 7 - 12 show that adding layers makes a model prone to achieve an optimal fit earlier-on during training. The training procedure also becomes more complicated, as can be seen by the noisier patterns followed by the accuracy and loss curves of the networks with more than one hidden layer. Both of these problems can be partially remedied by regularization, which is tested in a later section of this paper. 
 
 \subsection{Activation Functions}
-\par An additional parameter important to a model's performance is its activation function. All weight-input products in a neural network are fed through a nonlinear activation function, as otherwise the network would produce a linear decision boundary (Raschka 2016). Different activation functions, however, exhibit different performance, with some being preferable to others. Here I test three different activations on this classification task.
-\par The first activation I test is the sigmoid function. The sigmoidal activation was the original deep learning activation function, being a nonlinear function that is already recognized by most, if not all, in the statistical learning field. The function is defined as:
+\par An additional parameter important to a model's performance is its activation function. All weight-input products in a neural network are fed through a nonlinear activation function, as otherwise the network would produce a linear decision boundary (Raschka 2016). Different activation functions, however, exhibit different performance characteristics, with some being preferable to others. Here I test three different activations on this classification task.
+\par The first activation I test is the logistic sigmoid function. The sigmoidal activation was the original deep learning activation function, being a nonlinear function that is already recognized by most, if not all, in the statistical learning field. The function is defined as:
 
 $$\sigma{(X)} = \frac{1}{1+\text{exp}(-X)}.$$
 
@@ -374,18 +371,18 @@ or alternatively:
 
 $$ 2\sigma{(X)} - 1. $$
 
-\par This function is typically preferred to the  logistic sigmoid for a variety of reasons. First, because it is bounded between -1 and 1,  it will commonly output values close to zero, whereas the logistic sigmoid will more commonly output values close to 0.5 (Lecun et al. 1998). This helps the network decide which features are most important. Second,  this function tends to have larger gradients, which aids the learning process. 
+\par This function is typically preferred to the  logistic sigmoid for a variety of reasons. First, because it is bounded between -1 and 1,  it will commonly output values close to zero, whereas the logistic sigmoid will more commonly output values close to 0.5 (Lecun et al. 1998). This quality helps the network decide which features are most important. Second,  this function tends to have larger gradients than the logistic sigmoid if inputs to the network are normalized, and this is known to help models find optimal solutions quicker. 
 \par The final activation function I test is quickly becoming one of the most commonly used: the Rectified Linear Unit (ReLU). This function computes:
 
 $$ \text{ReLU}(X) = \text{max}(0,X), $$
 
-making the function linear after $x=0,$ and equal to zero everywhere else. The main benefit of the ReLU is that it's quick to compute, speeding up stochastic gradient descent by up to a factor of six (Krizhevsky et al. 2012). The downside, however, is that this unit can be fragile, with the units often "dying" and becoming stuck being equal to zero during training (Karpathy 2016).
+making the function linear after $x=0$ and equal to zero everywhere else. The main benefit of the ReLU is that it's quick to compute, speeding up stochastic gradient descent by up to a factor of six (Krizhevsky et al. 2012). The downside, however, is that the unit can be fragile, with the units often "dying" and becoming stuck being equal to zero during training (Karpathy 2016).
 
-\par The results of testing these three activation functions are shown in Table 3. Each model in this table was a network with three hidden layers of 128 neurons each. 
+\par The results of testing these three activation functions are shown in Table 4. Each model in this table was a network with three hidden layers of 128 neurons each. 
 
 \begin{table}[!h]
 \centering
-\caption{My caption}
+\caption{Activation Function Results}
 \label{my-label}
 \begin{tabular}{lll}
 Activation Function & Accuracy (\%) & AUC  \\
@@ -412,9 +409,6 @@ Sigmoid             & 97.43         & 0.70
 \endminipage
 \end{figure}
 
-
-\par and more yet 
-
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
   \includegraphics[width=\linewidth]{dl-paper/activation-tanh-loss.png}
@@ -433,11 +427,11 @@ Sigmoid             & 97.43         & 0.70
 
 \subsection{Regularization: Dropout}
 \par My next consideration in model-building was regularization. Regularization works by trading increased bias for reduced variance, serving as a remedy to the overfitting problem. A tried and true strategy for building successful neural networks is to use large, appropriately regularized models (Goodfellow et al. 2016). 
-\par The first regularization strategy I test is Dropout. First introduced by Srivastava et al. (2014), Dropout provides a method for regularizing a broad family of models. This method works by "dropping out" a fixed percentage of nodes at random during each training iteration, forcing those weights to equal zero. The impact of dropping out nodes at random in this way is that it forces the network to learn representations of the data in its hidden layers that are robust to missing or modified information. If a network is being trained to recognize faces in images, for example, the network cannot learn to rely too heavily on an individual neuron that has learned to recognize individual features in the data such as noses or ears. If this individual neuron is required for the model's success and it is dropped out, after all, the model will have poor performance. As a result of this constraint, models trained using a dropout strategy must either learn more robust representations of features (i.e. have multiple nodes serve the purpose of recognizing a nose on a face, rather than just one), or learn more general representations of the data that still hold predictive accuracy on previously unseen data with potentially different properties (i.e. being able to recognize a face with no nose or ears).  
+\par The first regularization strategy I test is Dropout. First introduced by Srivastava et al. (2014), Dropout provides a method for regularizing a broad family of models. This method works by "dropping out" a fixed percentage of nodes at random during each training iteration, forcing those weights to equal zero. The impact of dropping out nodes at random in this way is that it forces the network to learn representations of the data in its hidden layers that are robust to missing or modified information. If a network is being trained to recognize faces in images, for example, the network cannot learn to rely too heavily on an individual neuron that has learned to recognize individual features in the data such as noses or ears. If this individual neuron is required for the model's success and it is dropped out, the model will have poor performance. As a result of this constraint, models trained using a dropout strategy must either learn more robust representations of features (i.e. have multiple nodes serve the purpose of recognizing a nose on a face, rather than just one), or learn more general representations of the data that still hold predictive accuracy on previously unseen data with potentially different properties (i.e. being able to recognize a face without a nose).  
 
-\par If we consider each combination of non-dropped-out nodes to be a unique model, this regularization strategy can be viewed as a bagging method, where each iteration trains a unique model that shares parameters with every other model (Goodfellow et al. 2016). Each iteration, borrowing some weights from the previous model and given a fresh set of constraints via its new set of dropped-out nodes, is encouraged to learn something slightly different than the previous. The end result is often a model with superior generalization to unseen data. The bias is higher due to the constraints imposed by setting nodes equal to zero during training, but the variance is lower for this same reason. 
+\par If we consider each combination of non-dropped-out weights to be a unique model, this regularization strategy can then be viewed as a bagging method, where each iteration trains a unique model that shares parameters with every other model (Goodfellow et al. 2016). Each iteration, borrowing some weights from the previous model and given a fresh set of constraints via its new set of dropped-out nodes, is encouraged to learn something slightly different than the previous. The end result is often a model with superior generalization to unseen data. Dropout increases a model's bias due to the constraints imposed by setting nodes equal to zero during training, but also decreases its variance for this same reason. 
 
-\par Here I test models using between-layer dropout of between 0 and 50\% of nodes. All models consisted of three hidden layers, each with 1024 units (Table X). All models used the Adam optimizer with hyperbolic tangent activation functions and the binary cross entropy cost function.
+\par Here I test models using between-layer dropout of between 0 and 50\% of nodes. All models consisted of three hidden layers, each with 1024 units (Table 5). All models used the Adam optimizer with hyperbolic tangent activation functions and the binary cross entropy cost function.
 
 \begin{table}[!h]
 \centering
@@ -455,7 +449,7 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 \end{table}
 
 
-\par The results of this testing shown in Table 4 demonstrate the value of regularizing a large model. Despite placing significant constraints on the model during training, the model with half of its units dropped out during each training iteration was able to match the performance of the model using no dropout at all. While the zero and ten percent dropout models' relative success makes this a somewhat complicated set of results to interpret, we can see from the improvements shown from moving from 20 to 30, 30 to 40, and then 40 to 50\% dropout that adding additional regularization strength can improve the performance of a large model. 
+\par The results of this testing shown in Table 5 demonstrate the value of regularizing a large model. Despite placing significant constraints on the model during training, the model with half of its units dropped out during each training iteration was able to match the performance of the model using no dropout at all. While the zero and ten percent dropout models' relative success makes this a somewhat complicated set of results to interpret, we can see from the improvements shown from moving from 20 to 30, 30 to 40, and then 40 to 50\% dropout that adding additional regularization strength can improve the performance of a large model. 
 
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
@@ -488,16 +482,15 @@ Percent of Weights Dropped Out (\%) & Accuracy (\%) & AUC  \\
 \endminipage
 \end{figure}
 
-\par Figures 19 through 24 show qualitatively the benefit of regularizing a neural network. First, we see that as additional dropout is added, the training and test accuracy curves move closer together. Second, we see that increasing the regularization of these models noticeably smooths out the test-loss curve, allowing loss to improve for a larger number of training steps and reducing the rate at which overfitting occurs as training continues. These are desirable qualities, indicating that dropping out 40 or 50\% of weights during training is an effective strategy for this model. 
-
-%  \subsection{Regularization: Weight Penalties} % TODO, time allowing 
+\par Figures 19 through 24 show qualitatively the benefit of regularizing a neural network. First, we see that as additional dropout is added, the training and test accuracy curves move closer together. Second, we see that increasing the regularization of these models noticeably smooths out the test-loss curve, allowing loss to improve for a larger number of training steps and reducing the rate at which overfitting occurs as training continues past the optimal point. These are desirable qualities, indicating that dropping out 40 or 50\% of weights during training is an effective strategy for this model. 
 
 \subsection{Regularization: Batch Normalization}
-\par filler text
+\par Part of the challenge of learning in neural models is the fact that the distribution of each layer's inputs is constantly changing during training, being dependent on both the outputs of prior layers in the network and the specific batch of data passing through the training iteration. Szegedy and Ioffe (2015) refer to this problem as internal covariate shift. Batch normalization is an attempt to remedy this by normalizing the inputs to each layer before the data are passed through its affine transformation and activation function (Szegedy and Ioffe 2015).
+\par Batch normalization is said to both reduce the number of training iterations required in order to find an optimal model and also improve out of sample accuracy (Szegedy and Ioffe 2015). Further, this method is also said to have a regularizing effect, improving generalization by making individual training iterations less dependent on the specific data drawn in that particular iteration (Szegedy and Ioffe 2015).  
 
 \begin{table}[!h]
 \centering
-\caption{My caption}
+\caption{Batch Normalization Results}
 \label{my-label}
 \begin{tabular}{lll}
              & Accuracy (\%) & AUC  \\
@@ -505,8 +498,6 @@ No Batchnorm & 97.01         & 0.76 \\
 Batchnorm    & 97.19         & 0.79
 \end{tabular}
 \end{table}
-
-\par filler text 
 
 \begin{figure}[!h]
 \minipage{0.45\textwidth}
@@ -530,15 +521,15 @@ Batchnorm    & 97.19         & 0.79
 \endminipage\hfill
 \end{figure}
 
-\par filler text. scales are deceiving on the accuracy plots. the loss one looks better with batch norm though. and performance improves, so that's nice. 
+\par The results in Table 6 show that batch normalization does indeed help when applied to this data. This strategy seems particularly appropriate for use with financial data because of the distribution-related problems discussed in Section 2. 
 
 \subsection{Optimization: Adaptive Learning Rates}
-\par The final model-related strategy I test is learning rate procedure. While early neural networks were trained via either batch or stochastic gradient descent with set learning rates, almost all successful models today employ either an adaptive learning rate algorithm or some form of learning rate decay. The reason for employing these methods is that a larger learning rate is desirable early-on in training, as this allows the model to learn faster. As the model approaches a local optimum in its objective function, a smaller learning rate becomes desirable so that it can hone in on the optimal point and avoid leaving this section of the parameter space. For this reason, a variety of adaptive learning rate algorithms exist. For an overview of the available gradient descent optimization algorithms and how they work, see Ruder (2016). 
-\par Here I test a static learning rate, a decaying learning rate, and the popular adaptive learning rate algorithms Adam and RMSprop. The results of these tests are shown in Table 6. 
+\par The final model-related strategy I test is learning rate procedure. While early neural networks were trained via either batch or stochastic gradient descent with either static or linearly cooled learning rates, many successful models today employ some form of adaptive learning rate algorithm. The reason for using these algorithms is that, while a larger learning rate is desirable early-on in training, a smaller learning rate becomes desirable as the model approaches a local optimum in its objective function  so that it can hone in on the optimal point and avoid leaving this section of the parameter space. Neural networks' objective functions are highly nonconvex, so it is ideal for a model's learning rate to be highly flexible. For this reason, a variety of adaptive learning rate algorithms exist. For an overview of the available gradient descent optimization algorithms and how they work, see Ruder (2016). 
+\par Here I test a static learning rate, a decaying learning rate, and the popular adaptive learning rate algorithms Adam and RMSprop. The results of these tests are shown in Table 7. 
 
 \begin{table}[!h]
 \centering
-\caption{My caption}
+\caption{Optimizer Results}
 \label{my-label}
 \begin{tabular}{lll}
 Optimizer                    & Accuracy (\%) & AUC  \\
@@ -549,7 +540,7 @@ RMSprop                      & 97.79         & 0.79
 \end{tabular}
 \end{table}
 
-\par Table 6 shows that smarter, adaptive learning rate algorithms can lead to significantly improved results. While the networks trained with stochastic gradient descent, both static and with learning rate decay, achieved AUC scores of 0.72, the models using the Adam and RMSprop optimizers achieved scores of 0.78 and 0.79 respectively. Turning to their training curves (Figures 29 - 34), RMSprop appears to have a slightly more reliable training process with less noise between training iterations. 
+\par Table 7 shows that smarter, adaptive learning rate algorithms can lead to significantly improved results. While the networks trained with stochastic gradient descent, both static and with learning rate decay, achieved AUC scores of 0.72, the models using the Adam and RMSprop optimizers achieved scores of 0.78 and 0.79 respectively. Turning to their training curves (Figures 29 - 34), Adam appears to have a slightly more reliable training process with less noise between training iterations. 
 
 \begin{figure}[!h]
 \minipage{0.32\textwidth}
@@ -594,13 +585,13 @@ RMSprop                      & 97.79         & 0.79
 \item Layer size (256, 512, or 1024 nodes in largest layer)
 \item Number of layers (3, 4, or 5 layers)
 \item Layer structure (N $\rightarrow$ N $\rightarrow$ N layer structure vs. N $\rightarrow$ (N/2) $\rightarrow$ (N/2)/2 structure.)
-\item Activation function (ReLU vs. RMSprop)
+\item Activation function (ReLU vs. tanh)
 \end{itemize}
 
 Additional to these parameters being varied, each model uses batch normalization between hidden layers.
 
-\section{Results}
-% best model: ReLU, 5 layers, 30% dropout, triangular structure, 1024 top-layer nodes, batch norm 
+\subsection{Results}
+\par Of the 144 models tested, the most successful was a model with five hidden layers, containing 1024, 512, 256, 128, and 64 nodes respectively. The model uses a 30\% dropout rate and also uses batch normalization between each hidden layer. This model achieved a 98.51\% accuracy score with an impressive AUC score of 0.83. 
 
 \section{Discussion}
 %EE forecasting difficult because x y and z. nets show some promise when using methods x y and z. 
@@ -621,5 +612,6 @@ Additional to these parameters being varied, each model uses batch normalization
 % Krizhevsky et al. 2012 - imagenet classification with deep convolutional . . . . 
 % Ruder 2016  - blog post on LR optimization algs http://sebastianruder.com/optimizing-gradient-descent/index.html#rmsprop
 % Tape, n.d. . Site explaining ROC curves. http://gim.unmc.edu/dxtests/
+% Szegedy and Ioffe 2015 batch norm internal covaraite shift 
 \end{document}
 
